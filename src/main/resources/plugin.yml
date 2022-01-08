@@ -1,0 +1,8 @@
+name: TNTRun
+version: '${project.version}'
+main: dev.pns.tntrun.TNTRun
+api-version: 1.8
+authors: [ PnsDev ]
+website: https://pns.dev
+depend:
+  - SlimeWorldManager
