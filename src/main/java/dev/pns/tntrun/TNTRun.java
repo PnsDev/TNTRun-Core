@@ -1,10 +1,7 @@
 package dev.pns.tntrun;
 
 import com.grinderwolf.swm.api.SlimePlugin;
-import com.grinderwolf.swm.api.loaders.SlimeLoader;
-import com.grinderwolf.swm.api.world.SlimeWorld;
-import com.grinderwolf.swm.api.world.properties.SlimePropertyMap;
-import dev.pns.tntrun.constructors.Game;
+import dev.pns.tntrun.game.Game;
 import dev.pns.tntrun.tasks.TimerEventRunnable;
 import lombok.Getter;
 import org.bukkit.Bukkit;

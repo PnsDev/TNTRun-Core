@@ -1,6 +1,8 @@
 package dev.pns.tntrun.events;
 
 import dev.pns.tntrun.constructors.*;
+import dev.pns.tntrun.game.Game;
+import dev.pns.tntrun.game.GamePlayer;
 import lombok.Getter;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -80,10 +82,10 @@ public class LocationTracking implements Listener {
                 blocks.add(blockUnder.getLocation().add(-feetBoundingBoxSize, 0, -feetBoundingBoxSize).getBlock());
                 blocks.add(blockUnder.getLocation().add(0, 0, feetBoundingBoxSize).getBlock());
                 blocks.add(blockUnder.getLocation().add(0, 0, -feetBoundingBoxSize).getBlock());
-                blocks.add(blockUnder.getLocation().add(0, 0, feetBoundingBoxSize).getBlock());
-                blocks.add(blockUnder.getLocation().add(0, 0, -feetBoundingBoxSize).getBlock());
+                blocks.add(blockUnder.getLocation().add(feetBoundingBoxSize, 0, 0).getBlock());
+                blocks.add(blockUnder.getLocation().add(-feetBoundingBoxSize, 0, 0).getBlock());
                 blocks.removeIf(block -> !breakableBlockTypes.contains(block.getType()) || toBeRemoved.containsKey(block));
-            } else if (breakableBlockTypes.contains(blockUnder.getType()) || toBeRemoved.containsKey(blockUnder)) blocks.add(blockUnder);
+            } else if (breakableBlockTypes.contains(blockUnder.getType()) || !toBeRemoved.containsKey(blockUnder)) blocks.add(blockUnder);
 
             // Add blocks to be removed
             blocks.forEach(block -> toBeRemoved.put(block, System.currentTimeMillis()));
