@@ -16,10 +16,9 @@ import java.util.concurrent.CompletableFuture;
 
 import static dev.pns.tntrun.utils.SlimeWorldUtils.loadMap;
 
+@Getter
 public class Lobby {
-    @Getter
     private World world;
-    @Getter
     private GameMap map = null;
     private final List<Player> players = new ArrayList<>();
 
@@ -49,6 +48,7 @@ public class Lobby {
     public void addPlayer(Player player) {
         players.add(player);
         player.teleport(map.getSpawnPoints().get(0).toLocation(world));
+        player.getInventory().clear();
         //TODO: Makes scoreboard and inventory
     }
 

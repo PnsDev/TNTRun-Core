@@ -12,13 +12,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public final class TNTRun extends JavaPlugin {
     private SlimePlugin slimeWorldLoader;
-    @Getter
     private Lobby lobby;
     private List<Game> games = new ArrayList<>();
     @Setter
-    @Getter
     private boolean openForPlayers = false;
 
     @Override
@@ -26,14 +25,16 @@ public final class TNTRun extends JavaPlugin {
         Bukkit.getScheduler().runTaskTimer(this, new TimerEventRunnable(), 0, 1);
         slimeWorldLoader = (SlimePlugin) Bukkit.getPluginManager().getPlugin("SlimeWorldManager");
         lobby = new Lobby(this, slimeWorldLoader);
-
-
     }
 
     @Override
     public void onDisable() {
-        Bukkit.getOnlinePlayers().forEach(player -> player.kickPlayer("Server core is "));
-        openForPlayers = false; // Stop players from logging in
+        openForPlayers = false; // Stop players from logging in (Shouldn't be needed)
+        Bukkit.getOnlinePlayers().forEach(player -> player.kickPlayer("§cServer core is restarting"));
+        // Unload all game worlds
+        games.forEach(game -> {
+            if (game.getWorld() != null) Bukkit.unloadWorld(game.getWorld(), false);
+        });
         if (lobby != null && lobby.getWorld() != null) Bukkit.getServer().unloadWorld(lobby.getWorld(), false);
         slimeWorldLoader = null;
         games.clear();

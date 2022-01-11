@@ -1,6 +1,9 @@
 package dev.pns.tntrun.events;
 
 import dev.pns.tntrun.TNTRun;
+import dev.pns.tntrun.game.Game;
+import dev.pns.tntrun.game.GamePlayer;
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
@@ -22,14 +25,30 @@ public class PlayerConnectionEvents implements Listener {
     
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
-        e.setJoinMessage("§8[§a+§8] §7" + e.getPlayer().getName());
+        e.setJoinMessage("");
         core.getLobby().addPlayer(e.getPlayer());
+        Bukkit.getOnlinePlayers().forEach(p -> {
+            if (!core.getLobby().isPlayerInLobby(p)) e.getPlayer().hidePlayer(p);
+            else e.getPlayer().sendMessage("§7[§a+§7] §a" + e.getPlayer().getName());
+        });
     }
 
     @EventHandler
     public void onLeave(PlayerQuitEvent e) {
-        e.setQuitMessage("§8[§c-§8] §7" + e.getPlayer().getName());
-        if (core.getLobby().isPlayerInLobby(e.getPlayer())) return;
-        // TODO: make spectator in case game is active
+        e.setQuitMessage("");
+        if (core.getLobby().isPlayerInLobby(e.getPlayer())) {
+            core.getLobby().getPlayers().forEach(p -> p.sendMessage("§7[§c-§7] §c" + e.getPlayer().getName()));
+            return;
+        }
+
+        // Remove player from their game
+        for (Game game : core.getGames()) {
+            for (GamePlayer gamePlayer : game.getPlayers()) {
+                if (gamePlayer.getPlayer().equals(e.getPlayer())) {
+                    game.removeFromGame(gamePlayer);
+                    return;
+                }
+            }
+        }
     }
 }

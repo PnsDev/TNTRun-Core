@@ -6,11 +6,12 @@ import org.simpleyaml.configuration.ConfigurationSection;
 import org.simpleyaml.configuration.file.YamlFile;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Getter
 public class GameMap {
+    private final static Random random = new Random();
+
     private final String name;
     private final List<String> builders;
     private final File slimeWorld;
@@ -38,6 +39,16 @@ public class GameMap {
         this.mapCorner = new Coordinates(mapCornerSection.getInt("x"), mapCornerSection.getInt("y"), mapCornerSection.getInt("z"));
 
         this.minY = yamlFile.getDouble("min-y");
+    }
+
+    /**
+     * Gets a random map from the list of maps
+     * @return A random map
+     */
+    public static GameMap getRandomMap() {
+        List<File> files = Arrays.asList(Objects.requireNonNull(new File("maps").listFiles()));
+        files.removeIf(file -> !file.isDirectory() || file.getName().equals("lobby"));
+        return new GameMap(files.get(random.nextInt(files.size())));
     }
 }
 

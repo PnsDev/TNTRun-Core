@@ -1,14 +1,22 @@
 package dev.pns.tntrun.game;
 
+import dev.pns.tntrun.TNTRun;
+import dev.pns.tntrun.constructors.PowerUp;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 @Getter
 public class Game {
+    private final TNTRun core;
+
     @Setter
     private String name;
     @Setter
@@ -22,10 +30,39 @@ public class Game {
 
     private GameState state = GameState.LOBBY;
 
+    @Setter
+    private GameMap map = GameMap.getRandomMap();
+
+
+    private World world = null;
+
+    @Setter
     private Player owner;
     private final List<Player> moderators = new ArrayList<>();
 
-    public Game(String name, String description, Player owner) {
+    // Game Settings
+    @Setter
+    private boolean randomGameMaps = true;
+    @Setter
+    private boolean powerupsEnabled = true;
+    private List<PowerUp> disabledPowerups = new ArrayList<>();
+    @Setter
+    private double powerupRate =  60;
+    @Setter
+    private int blockBreakSpeed = 6;
+    @Setter
+    private int speedPotionAmount = 3;
+    @Setter
+    private int slowPotionAmount = 0;
+    @Setter
+    private int doubleJumpAmount = 10;
+    @Setter
+    private boolean pvpEnabled = false;
+    @Setter
+    private int pvpDamage = 0;
+
+    public Game(TNTRun core, String name, String description, Player owner) {
+        this.core = core;
         this.name = name;
         this.description = description;
         this.owner = owner;
@@ -35,11 +72,32 @@ public class Game {
         switch (newState) {
             case LOBBY:
                 if (!state.equals(GameState.STARTING) && !state.equals(GameState.ENDING)) return;
-                // TODO:
-                //  Unload the game map
+
+                if (state.equals(GameState.ENDING)) {
+                    if (randomGameMaps) map = GameMap.getRandomMap();
+
+                    // Reset all spectators to players
+                    Iterator<GamePlayer> iterator = players.iterator();
+                    while (iterator.hasNext()) {
+                        this.players.add(iterator.next());
+                        iterator.remove();
+                    }
+                    // Teleport all players to lobby & deal with visibility
+                    Location spawn = core.getLobby().getMap().getSpawnPoints().get(0).toLocation(core.getLobby().getWorld());
+                    this.players.forEach(targetPlayer -> {
+                        targetPlayer.getPlayer().teleport(spawn);
+                        this.players.forEach(toBeDisplayed -> {
+                            if (toBeDisplayed.equals(targetPlayer))
+                                targetPlayer.getPlayer().showPlayer(toBeDisplayed.getPlayer());
+                        });
+                    });
+                }
+
+                if (world != null) Bukkit.unloadWorld(world, false);
                 break;
             case STARTING:
                 if (!state.equals(GameState.LOBBY)) return;
+
                 // TODO:
                 //  register timer
                 //  load the game map
@@ -59,6 +117,40 @@ public class Game {
                 break;
         }
         state = newState;
+    }
+
+    public boolean joinGame(Player player) {
+        if (players.size() >= maxPlayers) return false; //TODO: add bypass permission?
+        core.getLobby().getPlayers().remove(player);
+        if (state.equals(GameState.STARTED) || state.equals(GameState.ENDING)) {
+            makeSpectator(new GamePlayer(player, this));
+            return true;
+        }
+        this.players.add(new GamePlayer(player, this));
+        return true;
+    }
+
+    public void removeFromGame(GamePlayer gamePlayer) {
+        if (players.contains(gamePlayer)) makeSpectator(gamePlayer);
+        if (!gamePlayer.getPlayer().isOnline()) {
+            spectators.remove(gamePlayer);
+            return;
+        }
+        gamePlayer.getPlayer().teleport(core.getLobby().getMap().getSpawnPoints().get(0).toLocation(core.getLobby().getWorld()));
+    }
+
+    public void makeSpectator(GamePlayer gamePlayer) {
+        if (players.contains(gamePlayer)) {
+            players.remove(gamePlayer);
+            // TODO: death message
+        }
+        spectators.add(gamePlayer);
+        if (!gamePlayer.getPlayer().isOnline()) return;
+        if (state.equals(GameState.STARTED) || state.equals(GameState.ENDING)) {
+            players.forEach(targetPlayer -> targetPlayer.getPlayer().hidePlayer(gamePlayer.getPlayer()));
+            spectators.forEach(targetPlayer -> gamePlayer.getPlayer().showPlayer(targetPlayer.getPlayer()));
+            gamePlayer.getPlayer().teleport(map.getSpawnPoints().get(0).toLocation(world));
+        }
     }
 
 
