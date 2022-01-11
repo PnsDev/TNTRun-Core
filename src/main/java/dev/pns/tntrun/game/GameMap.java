@@ -13,7 +13,7 @@ import java.util.List;
 public class GameMap {
     private final String name;
     private final List<String> builders;
-    private final String slimeWorldName;
+    private final File slimeWorld;
 
     private final List<Coordinates> spawnPoints = new ArrayList<>();
 
@@ -22,11 +22,11 @@ public class GameMap {
     private final double minY; // Used to kill player
 
     public GameMap(File file) {
-        if (!file.getName().endsWith(".yml")) throw new IllegalArgumentException("File must be a .yml file");
-        YamlFile yamlFile = new YamlFile(file);
+        YamlFile yamlFile = new YamlFile(new File(file, "data.yml"));
         this.name = yamlFile.getString("name");
         this.builders = yamlFile.getStringList("builders");
-        this.slimeWorldName = yamlFile.getString("slime-world-name");
+        this.slimeWorld =new File(file, "map.slime");
+        if (!slimeWorld.exists()) throw new IllegalArgumentException("Map file does not exist");
 
         ConfigurationSection spawnPointsSection = yamlFile.getConfigurationSection("spawn-points");
         for (String key : spawnPointsSection.getKeys(false)) {

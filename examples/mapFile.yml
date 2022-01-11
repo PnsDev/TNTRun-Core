@@ -2,9 +2,6 @@
 name: The Box
 builders: ["Offline"]
 
-# This is the name of the map file stored in the slime-world folder
-slime-world-name: "the-box"
-
 spawn-points:
   - x: 1
     y: 2
