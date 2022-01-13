@@ -8,6 +8,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -32,6 +34,9 @@ public class Game {
 
     @Setter
     private GameMap map = GameMap.getRandomMap();
+
+    // Used for unscheduling events
+    private List<Listener> listeners = new ArrayList<>();
 
 
     private World world = null;
@@ -111,6 +116,13 @@ public class Game {
                 break;
             case ENDING:
                 if (!state.equals(GameState.STARTED)) return;
+
+                // Unregister
+                Iterator<Listener> it = listeners.iterator();
+                while (it.hasNext()) {
+                    HandlerList.unregisterAll(it.next());
+                    it.remove();
+                }
                 // TODO:
                 //  unregister events
                 //  win effects?

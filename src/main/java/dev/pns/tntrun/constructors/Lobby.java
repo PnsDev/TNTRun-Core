@@ -24,7 +24,7 @@ public class Lobby {
 
     public Lobby(TNTRun core, SlimePlugin slimeWorldLoader) {
         try {
-            map = new GameMap(new File("/maps/lobby/"));
+            map = new GameMap(new File("maps/lobby"));
         } catch (Exception e) {
             e.printStackTrace();
             core.disablePlugin();
@@ -37,10 +37,10 @@ public class Lobby {
         mapFuture.whenComplete((unused, throwable) -> {
             if (throwable != null || Bukkit.getWorld("lobbyWorld") == null) {
                 Bukkit.getLogger().warning("Lobby world could not be generated!");
-                core.setOpenForPlayers(true);
                 return;
             }
             this.world = Bukkit.getWorld("lobbyWorld");
+            core.setOpenForPlayers(true);
             Bukkit.getLogger().info("Lobby world generated in " + (System.currentTimeMillis() - i) + "ms");
         });
     }

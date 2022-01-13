@@ -4,8 +4,10 @@ import dev.pns.tntrun.constructors.Coordinates;
 import lombok.Getter;
 import org.simpleyaml.configuration.ConfigurationSection;
 import org.simpleyaml.configuration.file.YamlFile;
+import org.simpleyaml.exceptions.InvalidConfigurationException;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 @Getter
@@ -22,18 +24,16 @@ public class GameMap {
     private final Coordinates mapCorner;
     private final double minY; // Used to kill player
 
-    public GameMap(File file) {
+    public GameMap(File file) throws IOException, InvalidConfigurationException {
         YamlFile yamlFile = new YamlFile(new File(file, "data.yml"));
+        yamlFile.load();
         this.name = yamlFile.getString("name");
         this.builders = yamlFile.getStringList("builders");
-        this.slimeWorld =new File(file, "map.slime");
+        this.slimeWorld = new File(file, "region.slime");
         if (!slimeWorld.exists()) throw new IllegalArgumentException("Map file does not exist");
 
-        ConfigurationSection spawnPointsSection = yamlFile.getConfigurationSection("spawn-points");
-        for (String key : spawnPointsSection.getKeys(false)) {
-            ConfigurationSection spawnPointSection = spawnPointsSection.getConfigurationSection(key);
-            spawnPoints.add(new Coordinates(spawnPointSection.getInt("x"), spawnPointSection.getInt("y"), spawnPointSection.getInt("z")));
-        }
+        List<List<Integer>> spawnPointsSection = (List<List<Integer>>) yamlFile.getList("spawn-points");
+        spawnPointsSection.forEach(list -> spawnPoints.add(new Coordinates(list.get(0), list.get(1), list.get(2))));
 
         ConfigurationSection mapCornerSection = yamlFile.getConfigurationSection("map-corner");
         this.mapCorner = new Coordinates(mapCornerSection.getInt("x"), mapCornerSection.getInt("y"), mapCornerSection.getInt("z"));
@@ -48,7 +48,12 @@ public class GameMap {
     public static GameMap getRandomMap() {
         List<File> files = Arrays.asList(Objects.requireNonNull(new File("maps").listFiles()));
         files.removeIf(file -> !file.isDirectory() || file.getName().equals("lobby"));
-        return new GameMap(files.get(random.nextInt(files.size())));
+        try {
+            return new GameMap(files.get(random.nextInt(files.size())));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
 

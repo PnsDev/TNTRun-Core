@@ -4,6 +4,7 @@ import dev.pns.tntrun.constructors.*;
 import dev.pns.tntrun.game.Game;
 import dev.pns.tntrun.game.GamePlayer;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -30,6 +31,10 @@ public class LocationTracking implements Listener {
     public LocationTracking(Game game) {
         this.game = game;
         game.getPlayers().forEach(gamePlayer -> antiFreeze.put(gamePlayer, new TickPosition(gamePlayer.getPlayer().getLocation())));
+
+        BlockRemoval blockRemoval = new BlockRemoval(this);
+        Bukkit.getPluginManager().registerEvents(blockRemoval, game.getCore());
+        game.getListeners().add(blockRemoval);
     }
 
     @EventHandler

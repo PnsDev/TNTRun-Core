@@ -1,0 +1,18 @@
+# These are fully cosmetic and are only for the game start/end
+name: "Lobby"
+builders: ["Offline"]
+
+spawn-points:
+  - x: 12
+    y: 31
+    z: -27
+
+# Maps should always start at 0,0,0
+map-corner:
+  x: 0
+  y: 0
+  z: 0
+
+# This is the coordinate at which a player dies if they fall
+min-y: 0
+
