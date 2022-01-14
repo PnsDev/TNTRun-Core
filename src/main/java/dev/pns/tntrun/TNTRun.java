@@ -59,40 +59,28 @@ public final class TNTRun extends JavaPlugin {
             File mapFolder = new File("maps");
             if (!mapFolder.exists()) mapFolder.mkdir();
 
-            SlimeWorldUtils.saveResource(this, "region.slime", mapFolder, true);
+            // Load lobby if does not exist
+            File lobbyFolder = new File(mapFolder, "lobby");
+            if (!lobbyFolder.exists()) lobbyFolder.mkdir();
+            File mapFile = new File(lobbyFolder, "lobby/region.slime");
+            File dataFile = new File(lobbyFolder, "lobby/data.yml");
+            if (!mapFile.exists()) SlimeWorldUtils.saveResource(this, "lobby/region.slime", lobbyFolder, true);
+            if (!dataFile.exists()) SlimeWorldUtils.saveResource(this, "lobby/data.slime", lobbyFolder, true);
 
-            //Files.copy(getResource("region.slime"), Paths.get(mapFolder.getAbsolutePath() + "\\region.slime"), StandardCopyOption.REPLACE_EXISTING);
 
-            // Download the lobby file
-            //if (!new File(mapFolder, "lobby").exists()) {
-
-
-                //Files.copy(getResource("region.slime"), Paths.get(mapFolder.getAbsolutePath() + "\\region.slime"), StandardCopyOption.REPLACE_EXISTING);
-
-                /*
-                System.out.println(mapFolder.getAbsolutePath() + "\\lobby.zip");
-                Files.copy(getResource("lobby.zip"), Paths.get(mapFolder.getAbsolutePath() + "\\lobby.zip"), StandardCopyOption.REPLACE_EXISTING);
-                File lobbyFile = new File(mapFolder, "lobby.zip");
-                FileInputStream input = new FileInputStream(lobbyFile);
-                unzipFile(input, mapFolder);
-                input.close();
-                lobbyFile.delete();*/
-            //}
-
-            // Download the default map
-            /*
-            if (!new File(mapFolder, "demo").exists()) {
-                Path temp = Files.createTempFile("temp", ".zip");
-                Files.copy(getResource("demo.zip"), temp);
-                FileInputStream input = new FileInputStream(temp.toFile());
-                unzipFile(input, mapFolder);
-            }*/
-
+            // Load default map if no other maps
+            if (mapFolder.listFiles().length < 2) {
+                File demoFolder = new File(mapFolder, "demo");
+                demoFolder.mkdir();
+                mapFile = new File(demoFolder, "lobby/region.slime");
+                dataFile = new File(demoFolder, "lobby/data.yml");
+                if (!mapFile.exists()) SlimeWorldUtils.saveResource(this, "demo/region.slime", demoFolder, true);
+                if (!dataFile.exists()) SlimeWorldUtils.saveResource(this, "demo/data.slime", demoFolder, true);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             this.setEnabled(false);
         }
-
     }
 
     public void disablePlugin() {
