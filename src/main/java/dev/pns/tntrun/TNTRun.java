@@ -11,9 +11,16 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.net.URI;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipFile;
+
+import static dev.pns.tntrun.utils.SlimeWorldUtils.unzipFile;
 
 @Getter
 public final class TNTRun extends JavaPlugin {
@@ -31,10 +38,8 @@ public final class TNTRun extends JavaPlugin {
         // Register main events
         Bukkit.getPluginManager().registerEvents(new PlayerConnectionEvents(this), this);
 
-        System.out.println("1");
         loadDefaultMaps();
 
-        System.out.println("3");
         lobby = new Lobby(this, slimeWorldLoader);
 
 
@@ -55,28 +60,32 @@ public final class TNTRun extends JavaPlugin {
     }
 
     private void loadDefaultMaps() {
-        File mapFolder = new File("maps");
-        if (!mapFolder.exists()) mapFolder.mkdir();
-        File lobbyFolder = new File(mapFolder, "lobby");
-        if (!lobbyFolder.exists()) lobbyFolder.mkdir();
         try {
-            File mapFile = new File(lobbyFolder, "region.slime");
-            File dataFile = new File(lobbyFolder, "data.yml");
-            if (!mapFile.exists()) Files.copy(getResource("lobby/region.slime"), mapFile.toPath());
-            if (!dataFile.exists()) Files.copy(getResource("lobby/data.yml"), dataFile.toPath());
+            File mapFolder = new File("maps");
+            if (!mapFolder.exists()) mapFolder.mkdir();
 
-            // Load demo map
-            if (mapFolder.listFiles().length < 2) {
-                File demoMapFile = new File(mapFolder, "demo");
-                if (!demoMapFile.exists()) demoMapFile.mkdir();
-                Files.copy(getResource("demo/region.slime"), new File(demoMapFile, "region.slime").toPath());
-                Files.copy(getResource("demo/data.yml"), new File(demoMapFile, "data.yml").toPath());
+            // Download the lobby file
+            if (!new File(mapFolder, "lobby").exists()) {
+                File temp = File.createTempFile("", ".zip");
+                Files.copy(getResource("lobby.zip"), temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                FileInputStream input = new FileInputStream(temp);
+                unzipFile(input, mapFolder);
+                temp.delete();
             }
+
+            // Download the default map
+            if (!new File(mapFolder, "demo").exists()) {
+                File temp = File.createTempFile("", ".zip");
+                Files.copy(getResource("demo.zip"), temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                FileInputStream input = new FileInputStream(temp);
+                unzipFile(input, mapFolder);
+                temp.delete();
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             this.setEnabled(false);
         }
-        System.out.println("2");
 
     }
 

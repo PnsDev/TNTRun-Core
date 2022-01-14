@@ -1,7 +1,7 @@
 package dev.pns.tntrun.game;
 
 import dev.pns.tntrun.TNTRun;
-import dev.pns.tntrun.constructors.PowerUp;
+import dev.pns.tntrun.constructors.PowerUpType;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -50,7 +50,7 @@ public class Game {
     private boolean randomGameMaps = true;
     @Setter
     private boolean powerupsEnabled = true;
-    private List<PowerUp> disabledPowerups = new ArrayList<>();
+    private List<PowerUpType> disabledPowerups = new ArrayList<>();
     @Setter
     private double powerupRate =  60;
     @Setter
@@ -140,6 +140,16 @@ public class Game {
         }
         this.players.add(new GamePlayer(player, this));
         return true;
+    }
+
+    public GamePlayer getGamePlayer(Player player) {
+        for (GamePlayer gamePlayer : players) {
+            if (gamePlayer.getPlayer().equals(player)) return gamePlayer;
+        }
+        for (GamePlayer gamePlayer : spectators) {
+            if (gamePlayer.getPlayer().equals(player)) return gamePlayer;
+        }
+        return null;
     }
 
     public void removeFromGame(GamePlayer gamePlayer) {
