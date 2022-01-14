@@ -17,7 +17,8 @@ public enum PowerUpType {
             ChatColor.AQUA,
             "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTMxMDRmMTlhOTQ1YzYyZTEwMzJkZTZlNmM2MzQyMDY2NDdkOTRlZDljMGE1ODRlNmQ2YjZkM2E0NzVmNTIifX19",
             (Player player) -> {
-                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, ))
+                player.sendMessage("a");
+                ////player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, ))
             }
     );
 

@@ -3,13 +3,13 @@ package dev.pns.tntrun.utils;
 import com.grinderwolf.swm.api.SlimePlugin;
 import com.grinderwolf.swm.api.world.SlimeWorld;
 import com.grinderwolf.swm.api.world.properties.SlimePropertyMap;
+import dev.pns.tntrun.TNTRun;
 import dev.pns.tntrun.constructors.SlimeFileLoader;
+import org.bukkit.Bukkit;
 
 import java.io.*;
-import java.nio.channels.FileChannel;
 import java.util.concurrent.CompletableFuture;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.logging.Level;
 
 public final class SlimeWorldUtils {
     private static final SlimePropertyMap properties = new SlimePropertyMap();
@@ -35,49 +35,37 @@ public final class SlimeWorldUtils {
     }
 
 
-    public static void unzipFile(FileInputStream is, File destDir) throws IOException {
+    public static void saveResource(TNTRun core, String resourcePath, File destinationFolder, boolean replace) {
+        if (resourcePath == null || resourcePath.equals("")) {
+            throw new IllegalArgumentException("ResourcePath cannot be null or empty");
+        }
 
-        byte[] buffer = new byte[1024];
-        ZipInputStream zis = new ZipInputStream(is);
-        ZipEntry zipEntry = zis.getNextEntry();
-        while (zipEntry != null) {
-            File newFile = newFile(destDir, zipEntry);
-            if (zipEntry.isDirectory()) {
-                if (!newFile.isDirectory() && !newFile.mkdirs()) {
-                    throw new IOException("Failed to create directory " + newFile);
-                }
-            } else {
-                // fix for Windows-created archives
-                File parent = newFile.getParentFile();
-                if (!parent.isDirectory() && !parent.mkdirs()) {
-                    throw new IOException("Failed to create directory " + parent);
-                }
+        resourcePath = resourcePath.replace('\\', '/');
+        InputStream in = core.getResource(resourcePath);
+        if (in == null) throw new IllegalArgumentException("The embedded resource '" + resourcePath + "' cannot be found");
 
-                // write file content
-                FileOutputStream fos = new FileOutputStream(newFile);
+        File outFile = new File(destinationFolder, resourcePath);
+        int lastIndex = resourcePath.lastIndexOf('/');
+        File outDir = new File(destinationFolder, resourcePath.substring(0, Math.max(lastIndex, 0)));
+
+        if (!outDir.exists()) outDir.mkdirs();
+
+        try {
+            if (!outFile.exists() || replace) {
+                OutputStream out = new FileOutputStream(outFile);
+                byte[] buf = new byte[1024];
                 int len;
-                while ((len = zis.read(buffer)) > 0) {
-                    fos.write(buffer, 0, len);
+                while ((len = in.read(buf)) > 0) {
+                    out.write(buf, 0, len);
                 }
-                fos.close();
+                out.close();
+                in.close();
+            } else {
+                Bukkit.getLogger().log(Level.WARNING, "Could not save " + outFile.getName() + " to " + outFile + " because " + outFile.getName() + " already exists.");
             }
-            zipEntry = zis.getNextEntry();
+        } catch (IOException ex) {
+            Bukkit.getLogger().log(Level.SEVERE, "Could not save " + outFile.getName() + " to " + outFile, ex);
         }
-        zis.closeEntry();
-        zis.close();
-    }
-
-    public static File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
-        File destFile = new File(destinationDir, zipEntry.getName());
-
-        String destDirPath = destinationDir.getCanonicalPath();
-        String destFilePath = destFile.getCanonicalPath();
-
-        if (!destFilePath.startsWith(destDirPath + File.separator)) {
-            throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
-        }
-
-        return destFile;
     }
 
 }

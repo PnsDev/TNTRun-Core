@@ -5,22 +5,17 @@ import dev.pns.tntrun.constructors.Lobby;
 import dev.pns.tntrun.events.PlayerConnectionEvents;
 import dev.pns.tntrun.game.Game;
 import dev.pns.tntrun.tasks.TimerEventRunnable;
+import dev.pns.tntrun.utils.SlimeWorldUtils;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.ZipFile;
 
-import static dev.pns.tntrun.utils.SlimeWorldUtils.unzipFile;
+
 
 @Getter
 public final class TNTRun extends JavaPlugin {
@@ -64,23 +59,34 @@ public final class TNTRun extends JavaPlugin {
             File mapFolder = new File("maps");
             if (!mapFolder.exists()) mapFolder.mkdir();
 
+            SlimeWorldUtils.saveResource(this, "region.slime", mapFolder, true);
+
+            //Files.copy(getResource("region.slime"), Paths.get(mapFolder.getAbsolutePath() + "\\region.slime"), StandardCopyOption.REPLACE_EXISTING);
+
             // Download the lobby file
-            if (!new File(mapFolder, "lobby").exists()) {
-                File temp = File.createTempFile("", ".zip");
-                Files.copy(getResource("lobby.zip"), temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                FileInputStream input = new FileInputStream(temp);
+            //if (!new File(mapFolder, "lobby").exists()) {
+
+
+                //Files.copy(getResource("region.slime"), Paths.get(mapFolder.getAbsolutePath() + "\\region.slime"), StandardCopyOption.REPLACE_EXISTING);
+
+                /*
+                System.out.println(mapFolder.getAbsolutePath() + "\\lobby.zip");
+                Files.copy(getResource("lobby.zip"), Paths.get(mapFolder.getAbsolutePath() + "\\lobby.zip"), StandardCopyOption.REPLACE_EXISTING);
+                File lobbyFile = new File(mapFolder, "lobby.zip");
+                FileInputStream input = new FileInputStream(lobbyFile);
                 unzipFile(input, mapFolder);
-                temp.delete();
-            }
+                input.close();
+                lobbyFile.delete();*/
+            //}
 
             // Download the default map
+            /*
             if (!new File(mapFolder, "demo").exists()) {
-                File temp = File.createTempFile("", ".zip");
-                Files.copy(getResource("demo.zip"), temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                FileInputStream input = new FileInputStream(temp);
+                Path temp = Files.createTempFile("temp", ".zip");
+                Files.copy(getResource("demo.zip"), temp);
+                FileInputStream input = new FileInputStream(temp.toFile());
                 unzipFile(input, mapFolder);
-                temp.delete();
-            }
+            }*/
 
         } catch (Exception e) {
             e.printStackTrace();
