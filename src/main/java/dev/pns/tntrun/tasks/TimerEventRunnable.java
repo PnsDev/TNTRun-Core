@@ -1,7 +1,7 @@
 package dev.pns.tntrun.tasks;
 
-import dev.pns.tntrun.constructors.TickTimer;
-import dev.pns.tntrun.constructors.TimerEvent;
+import dev.pns.tntrun.misc.TickTimer;
+import dev.pns.tntrun.misc.TimerEvent;
 import org.bukkit.Bukkit;
 
 import java.util.Arrays;

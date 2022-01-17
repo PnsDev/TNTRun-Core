@@ -1,8 +1,9 @@
 package dev.pns.tntrun.constructors;
 
-import dev.pns.tntrun.TNTRun;
 import dev.pns.tntrun.game.Game;
 import dev.pns.tntrun.game.GamePlayer;
+import dev.pns.tntrun.misc.TickTimer;
+import dev.pns.tntrun.misc.TimerEvent;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;

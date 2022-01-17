@@ -1,8 +1,10 @@
-package dev.pns.tntrun.events;
+package dev.pns.tntrun.game.events;
 
 import dev.pns.tntrun.constructors.*;
 import dev.pns.tntrun.game.Game;
 import dev.pns.tntrun.game.GamePlayer;
+import dev.pns.tntrun.misc.TickTimer;
+import dev.pns.tntrun.misc.TimerEvent;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -31,45 +33,52 @@ public class LocationTracking implements Listener {
     public LocationTracking(Game game) {
         this.game = game;
         game.getPlayers().forEach(gamePlayer -> antiFreeze.put(gamePlayer, new TickPosition(gamePlayer.getPlayer().getLocation())));
-
-        BlockRemoval blockRemoval = new BlockRemoval(this);
-        Bukkit.getPluginManager().registerEvents(blockRemoval, game.getCore());
-        game.getListeners().add(blockRemoval);
     }
 
     @EventHandler
     public void playerTracker(TimerEvent e) {
         if (!e.getTimer().equals(TickTimer.TICK_1)) return;
-        //TODO:
-        // Check if player is in map
 
         game.getPlayers().forEach(gamePlayer -> {
             Player player = gamePlayer.getPlayer();
             Block blockUnder = player.getWorld().getBlockAt(player.getLocation().subtract(0, .65, 0));
 
             /*
-             Anti-freeze:
-             Sometimes in testing players spam the f5 key to
-             cause their client to lag therefore making them
-             fly for a duration of time. (This can also be
-             caused by right-clicking the top of their minecraft
-             tab).
-             This is a measure to kill players doing this.
+             * Anti-freeze:
+             * Sometimes in testing players spam the f5 key to
+             * cause their client to lag therefore making them
+             * fly for a duration of time. (This can also be
+             * caused by right-clicking the top of their minecraft
+             * tab).
+             * This is a measure to kill players doing this.
              */
             if (!blockUnder.getType().equals(Material.AIR) && !player.getGameMode().equals(GameMode.CREATIVE)) {
                 TickPosition tp = antiFreeze.get(gamePlayer);
                 if (player.getLocation().distance(tp.getLocation()) <= antiFreezeDistance) tp.addTick();
-                if (tp.getTicks() >= allowedFlyTicks) System.out.println("cheating");// TODO: Make spec
+                if (tp.getTicks() >= allowedFlyTicks) {
+                    System.out.println("cheating");
+                    game.makeSpectator(gamePlayer);
+                }
                 return;
             }
             antiFreeze.get(gamePlayer).reset(player.getLocation());
 
             /*
-             Check if the player is standing on something they
-             shouldn't be (avoiding the anti-freeze and death)
+             * Check if the player is standing on something they
+             * shouldn't be (avoiding the anti-freeze and death)
              */
             if (blockUnder.getType().isSolid() && !allowedBlockTypes.contains(blockUnder.getType()) && !breakableBlockTypes.contains(blockUnder.getType())) {
-                System.out.println("cheating");// TODO: Make spec
+                System.out.println("cheating");
+                game.makeSpectator(gamePlayer);
+                return;
+            }
+
+            /*
+             * Kill player is they're outside the map.
+             * This is either because they fell out or got out of the map.
+             */
+            if (!game.getMap().isLocationInMap(player.getLocation())) {
+                game.makeSpectator(gamePlayer);
                 return;
             }
 

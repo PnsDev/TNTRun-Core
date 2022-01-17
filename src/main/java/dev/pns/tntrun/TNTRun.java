@@ -6,6 +6,7 @@ import dev.pns.tntrun.events.PlayerConnectionEvents;
 import dev.pns.tntrun.game.Game;
 import dev.pns.tntrun.tasks.TimerEventRunnable;
 import dev.pns.tntrun.utils.SlimeWorldUtils;
+import dev.pns.tntrun.utils.gui.GuiManager;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -22,6 +23,7 @@ public final class TNTRun extends JavaPlugin {
     private SlimePlugin slimeWorldLoader;
     private Lobby lobby;
     private List<Game> games = new ArrayList<>();
+    private GuiManager guiManager;
     @Setter
     private boolean openForPlayers = false;
 
@@ -29,6 +31,7 @@ public final class TNTRun extends JavaPlugin {
     public void onEnable() {
         Bukkit.getScheduler().runTaskTimer(this, new TimerEventRunnable(), 0, 1);
         slimeWorldLoader = (SlimePlugin) Bukkit.getPluginManager().getPlugin("SlimeWorldManager");
+        guiManager = new GuiManager(this);
 
         // Register main events
         Bukkit.getPluginManager().registerEvents(new PlayerConnectionEvents(this), this);
@@ -36,8 +39,6 @@ public final class TNTRun extends JavaPlugin {
         loadDefaultMaps();
 
         lobby = new Lobby(this, slimeWorldLoader);
-
-
     }
 
     @Override
@@ -57,26 +58,25 @@ public final class TNTRun extends JavaPlugin {
     private void loadDefaultMaps() {
         try {
             File mapFolder = new File("maps");
-            if (!mapFolder.exists()) mapFolder.mkdir();
+            if (!mapFolder.exists() && !mapFolder.mkdir()) throw new Exception("Failed to create maps folder");
 
             // Load lobby if does not exist
             File lobbyFolder = new File(mapFolder, "lobby");
             if (!lobbyFolder.exists()) lobbyFolder.mkdir();
-            File mapFile = new File(lobbyFolder, "lobby/region.slime");
-            File dataFile = new File(lobbyFolder, "lobby/data.yml");
-            if (!mapFile.exists()) SlimeWorldUtils.saveResource(this, "lobby/region.slime", lobbyFolder, true);
-            if (!dataFile.exists()) SlimeWorldUtils.saveResource(this, "lobby/data.slime", lobbyFolder, true);
-
+            File mapFile = new File(lobbyFolder, "region.slime");
+            File dataFile = new File(lobbyFolder, "data.yml");
+            if (!mapFile.exists()) SlimeWorldUtils.saveResource(this, "lobby/region.slime", mapFolder, true);
+            if (!dataFile.exists()) SlimeWorldUtils.saveResource(this, "lobby/data.yml", mapFolder, true);
 
             // Load default map if no other maps
-            if (mapFolder.listFiles().length < 2) {
-                File demoFolder = new File(mapFolder, "demo");
-                demoFolder.mkdir();
-                mapFile = new File(demoFolder, "lobby/region.slime");
-                dataFile = new File(demoFolder, "lobby/data.yml");
-                if (!mapFile.exists()) SlimeWorldUtils.saveResource(this, "demo/region.slime", demoFolder, true);
-                if (!dataFile.exists()) SlimeWorldUtils.saveResource(this, "demo/data.slime", demoFolder, true);
-            }
+            if (mapFolder.listFiles().length < 2) return;
+            File demoFolder = new File(mapFolder, "oceania");
+            demoFolder.mkdir();
+            mapFile = new File(demoFolder, "region.slime");
+            dataFile = new File(demoFolder, "data.yml");
+            if (!mapFile.exists()) SlimeWorldUtils.saveResource(this, "oceania/region.slime", mapFolder, true);
+            if (!dataFile.exists()) SlimeWorldUtils.saveResource(this, "oceania/data.yml", mapFolder, true);
+
         } catch (Exception e) {
             e.printStackTrace();
             this.setEnabled(false);

@@ -2,6 +2,8 @@ package dev.pns.tntrun.game;
 
 import dev.pns.tntrun.TNTRun;
 import dev.pns.tntrun.constructors.PowerUpType;
+import dev.pns.tntrun.game.tasks.GameStart;
+import dev.pns.tntrun.game.tasks.LobbyStart;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -14,11 +16,15 @@ import org.bukkit.event.Listener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
+
+import static dev.pns.tntrun.utils.SlimeWorldUtils.loadMap;
 
 @Getter
 public class Game {
     private final TNTRun core;
 
+    private UUID gameID = UUID.randomUUID();
     @Setter
     private String name;
     @Setter
@@ -96,35 +102,45 @@ public class Game {
                                 targetPlayer.getPlayer().showPlayer(toBeDisplayed.getPlayer());
                         });
                     });
+
+                    Bukkit.unloadWorld(world, false);
                 }
 
                 if (world != null) Bukkit.unloadWorld(world, false);
                 break;
             case STARTING:
                 if (!state.equals(GameState.LOBBY)) return;
-
-                // TODO:
-                //  register timer
-                //  load the game map
+                loadMap(core.getSlimeWorldLoader(), map.getSlimeWorld(), gameID.toString()).whenComplete((world, throwable) -> {
+                    if (throwable != null) return;
+                    this.world = Bukkit.getWorld(gameID.toString());
+                });
+                Bukkit.getPluginManager().registerEvents(new LobbyStart(this, 100), core);
                 break;
             case STARTED:
                 if (!state.equals(GameState.STARTING)) return;
-                // TODO:
-                //  make sure map is loaded
-                //  teleport players to the game map
-                //  show game description animation
+                if (world == null) {
+                    setGameState(GameState.LOBBY);
+                    return;
+                }
+
+                int i = 0;
+                for (GamePlayer player : players) {
+                    player.getPlayer().teleport(map.getSpawnPoints().get(i).toLocation(world));
+                    i = (map.getSpawnPoints().size() > i + 1) ? i + 1 : 0;
+                }
+
+                Bukkit.getPluginManager().registerEvents(new GameStart(this), core);
                 break;
             case ENDING:
                 if (!state.equals(GameState.STARTED)) return;
 
-                // Unregister
+                // Unregister events
                 Iterator<Listener> it = listeners.iterator();
                 while (it.hasNext()) {
                     HandlerList.unregisterAll(it.next());
                     it.remove();
                 }
                 // TODO:
-                //  unregister events
                 //  win effects?
                 break;
         }

@@ -1,20 +1,23 @@
 # These are fully cosmetic and are only for the game start/end
-name: "Lobby"
-builders: ["Offline"]
+name: "Oceania"
+builders: ["Melongan"]
 
 spawn-points:
-  - [12, 31, -27]
+  - [-43, 40, -41]
+  - [-38, 40, -36]
+  - [-33, 40, -41]
+  - [-38, 40, -46]
 
 min-map-corner:
-  x: 0
-  y: 0
-  z: 0
+  x: -70
+  y: 19
+  z: -73
 
 max-map-corner:
-  x: 0
-  y: 0
-  z: 0
+  x: -6
+  y: 69
+  z: -9
 
 # This is the coordinate at which a player dies if they fall
-min-y: 0
+min-y: 9
 
