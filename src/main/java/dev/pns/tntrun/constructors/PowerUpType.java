@@ -9,6 +9,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 @AllArgsConstructor @Getter
 public enum PowerUpType {
 
@@ -63,5 +67,12 @@ public enum PowerUpType {
 
     public interface OnPickup {
         void method(Player player);
+    }
+
+    public static PowerUpType getRandomFiltered(List<PowerUpType> filtered) {
+        List<PowerUpType> availablePowerUps = Arrays.asList(values());
+        availablePowerUps.removeIf(filtered::contains);
+        Collections.shuffle(availablePowerUps);
+        return availablePowerUps.size() == 0 ? null : availablePowerUps.get(0);
     }
 }

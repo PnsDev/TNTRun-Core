@@ -7,6 +7,7 @@ import dev.pns.tntrun.game.tasks.LobbyStart;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -42,7 +43,7 @@ public class Game {
     private GameMap map = GameMap.getRandomMap();
 
     // Used for unscheduling events
-    private List<Listener> listeners = new ArrayList<>();
+    private final List<Listener> listeners = new ArrayList<>();
 
 
     private World world = null;
@@ -58,7 +59,7 @@ public class Game {
     private boolean powerupsEnabled = true;
     private List<PowerUpType> disabledPowerups = new ArrayList<>();
     @Setter
-    private double powerupRate =  60;
+    private int powerupRate =  1200;
     @Setter
     private int blockBreakSpeed = 6;
     @Setter
@@ -178,16 +179,26 @@ public class Game {
     }
 
     public void makeSpectator(GamePlayer gamePlayer) {
+        Player player = gamePlayer.getPlayer();
+        player.setExp(0);
+        player.setLevel(0);
+        player.setAllowFlight(true);
+        player.setFlying(true);
+        player.setGameMode(GameMode.ADVENTURE);
+        player.getInventory().clear();
+        player.setSaturation(40);
+        player.setHealth(20);
+
         if (players.contains(gamePlayer)) {
             players.remove(gamePlayer);
             // TODO: death message
         }
         spectators.add(gamePlayer);
-        if (!gamePlayer.getPlayer().isOnline()) return;
+        if (!player.isOnline()) return;
         if (state.equals(GameState.STARTED) || state.equals(GameState.ENDING)) {
-            players.forEach(targetPlayer -> targetPlayer.getPlayer().hidePlayer(gamePlayer.getPlayer()));
-            spectators.forEach(targetPlayer -> gamePlayer.getPlayer().showPlayer(targetPlayer.getPlayer()));
-            gamePlayer.getPlayer().teleport(map.getSpawnPoints().get(0).toLocation(world));
+            players.forEach(targetPlayer -> targetPlayer.getPlayer().hidePlayer(player));
+            spectators.forEach(targetPlayer -> player.showPlayer(targetPlayer.getPlayer()));
+            player.teleport(map.getSpawnPoints().get(0).toLocation(world));
         }
     }
 

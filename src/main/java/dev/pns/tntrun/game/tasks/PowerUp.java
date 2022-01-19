@@ -1,7 +1,9 @@
-package dev.pns.tntrun.constructors;
+package dev.pns.tntrun.game.tasks;
 
+import dev.pns.tntrun.constructors.PowerUpType;
 import dev.pns.tntrun.game.Game;
 import dev.pns.tntrun.game.GamePlayer;
+import dev.pns.tntrun.game.GameState;
 import dev.pns.tntrun.misc.TickTimer;
 import dev.pns.tntrun.misc.TimerEvent;
 import lombok.Getter;
@@ -33,6 +35,10 @@ public class PowerUp implements Listener {
     @EventHandler
     public void onTick(TimerEvent e){
         if (!e.getTimer().equals(TickTimer.TICK_1)) return;
+        if (!game.getState().equals(GameState.STARTED)) {
+            destroy();
+            return;
+        }
 
         if (armorStand.getLocation().getY() <= spawnLocation.getY() - 1) goingUp = true;
         else if (armorStand.getLocation().getY() >= spawnLocation.getY()) goingUp = false;

@@ -3,6 +3,7 @@ package dev.pns.tntrun.game.tasks;
 import dev.pns.tntrun.game.Game;
 import dev.pns.tntrun.game.events.BlockRemoval;
 import dev.pns.tntrun.game.events.LocationTracking;
+import dev.pns.tntrun.game.events.PowerUpSpawn;
 import dev.pns.tntrun.misc.TimerEvent;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
@@ -22,16 +23,17 @@ public class GameStart implements Listener {
         if (ticksPassed == 201) {
             HandlerList.unregisterAll(this);
 
+            PowerUpSpawn powerUpSpawn = new PowerUpSpawn(game);
+            Bukkit.getPluginManager().registerEvents(powerUpSpawn, game.getCore());
+            game.getListeners().add(powerUpSpawn);
+
             LocationTracking locationTracking = new LocationTracking(game);
             Bukkit.getPluginManager().registerEvents(locationTracking, game.getCore());
             game.getListeners().add(locationTracking);
 
-            BlockRemoval blockRemoval = new BlockRemoval(locationTracking);
+            BlockRemoval blockRemoval = new BlockRemoval(locationTracking, powerUpSpawn);
             Bukkit.getPluginManager().registerEvents(blockRemoval, game.getCore());
             game.getListeners().add(blockRemoval);
-
-            // TODO: powerup timer
-            return;
         }
     }
 }

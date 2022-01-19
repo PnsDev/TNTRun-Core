@@ -1,12 +1,11 @@
 package dev.pns.tntrun.game.events;
 
-import dev.pns.tntrun.constructors.*;
+import dev.pns.tntrun.constructors.TickPosition;
 import dev.pns.tntrun.game.Game;
 import dev.pns.tntrun.game.GamePlayer;
 import dev.pns.tntrun.misc.TickTimer;
 import dev.pns.tntrun.misc.TimerEvent;
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -27,7 +26,9 @@ public class LocationTracking implements Listener {
     private static final double antiFreezeDistance = .2; // Distance needed to move every tick to be considered not frozen
     private static final double feetBoundingBoxSize = 0.301; // How big is the feet bounding box that deletes blocks
     private static final int allowedFlyTicks = 110; // Used for how many ticks a player can fail anti-freeze before being killed
+    @Getter
     private static final List<Material> breakableBlockTypes = Arrays.asList(Material.SAND, Material.TNT, Material.GRAVEL, Material.QUARTZ_BLOCK); // What block types can be broken by walking on them
+    @Getter
     private static final List<Material> allowedBlockTypes = Arrays.asList(Material.PISTON_BASE, Material.PISTON_EXTENSION, Material.PISTON_MOVING_PIECE, Material.PISTON_STICKY_BASE);
 
     public LocationTracking(Game game) {
