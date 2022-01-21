@@ -42,13 +42,8 @@ public class PlayerConnectionEvents implements Listener {
         }
 
         // Remove player from their game
-        for (Game game : core.getGames()) {
-            for (GamePlayer gamePlayer : game.getPlayers()) {
-                if (gamePlayer.getPlayer().equals(e.getPlayer())) {
-                    game.removeFromGame(gamePlayer);
-                    return;
-                }
-            }
-        }
+        GamePlayer gamePlayer = core.getGameManager().getGamePlayer(e.getPlayer());
+        if (gamePlayer == null) return;
+        gamePlayer.getGame().removeFromGame(gamePlayer);
     }
 }

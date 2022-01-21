@@ -80,6 +80,10 @@ public class Game {
         this.owner = owner;
     }
 
+    /**
+     * Changes the state of the game
+     * @param newState The new state
+     */
     public void setGameState(GameState newState) {
         switch (newState) {
             case LOBBY:
@@ -148,6 +152,11 @@ public class Game {
         state = newState;
     }
 
+    /**
+     * Adds a player to the game
+     * @param player The player to add
+     * @return Whether the player was added
+     */
     public boolean joinGame(Player player) {
         if (players.size() >= maxPlayers) return false; //TODO: add bypass permission?
         core.getLobby().getPlayers().remove(player);
@@ -159,6 +168,11 @@ public class Game {
         return true;
     }
 
+    /**
+     * Gets a gameplayer from the game
+     * @param player
+     * @return
+     */
     public GamePlayer getGamePlayer(Player player) {
         for (GamePlayer gamePlayer : players) {
             if (gamePlayer.getPlayer().equals(player)) return gamePlayer;
@@ -169,15 +183,24 @@ public class Game {
         return null;
     }
 
+    /**
+     * Removes a player from the game
+     * @param gamePlayer The player to remove
+     */
     public void removeFromGame(GamePlayer gamePlayer) {
         if (players.contains(gamePlayer)) makeSpectator(gamePlayer);
         if (!gamePlayer.getPlayer().isOnline()) {
             spectators.remove(gamePlayer);
             return;
         }
+        core.getLobby().getPlayers().add(gamePlayer.getPlayer());
         gamePlayer.getPlayer().teleport(core.getLobby().getMap().getSpawnPoints().get(0).toLocation(core.getLobby().getWorld()));
     }
 
+    /**
+     * Makes a player a spectator
+     * @param gamePlayer The player to make a spectator
+     */
     public void makeSpectator(GamePlayer gamePlayer) {
         Player player = gamePlayer.getPlayer();
         player.setExp(0);
