@@ -6,3 +6,6 @@ authors: [ PnsDev ]
 website: https://pns.dev
 depend:
   - SlimeWorldManager
+commands:
+  game:
+    description: a

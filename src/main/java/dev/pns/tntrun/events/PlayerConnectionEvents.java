@@ -3,6 +3,7 @@ package dev.pns.tntrun.events;
 import dev.pns.tntrun.TNTRun;
 import dev.pns.tntrun.game.Game;
 import dev.pns.tntrun.game.GamePlayer;
+import dev.pns.tntrun.utils.BarUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -36,6 +37,7 @@ public class PlayerConnectionEvents implements Listener {
     @EventHandler
     public void onLeave(PlayerQuitEvent e) {
         e.setQuitMessage("");
+        BarUtil.removeBar(e.getPlayer());
         if (core.getLobby().isPlayerInLobby(e.getPlayer())) {
             core.getLobby().getPlayers().forEach(p -> p.sendMessage("§7[§c-§7] §c" + e.getPlayer().getName()));
             return;

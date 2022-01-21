@@ -1,6 +1,7 @@
 package dev.pns.tntrun;
 
 import com.grinderwolf.swm.api.SlimePlugin;
+import dev.pns.tntrun.commands.GameCmd;
 import dev.pns.tntrun.constructors.Lobby;
 import dev.pns.tntrun.events.PlayerConnectionEvents;
 import dev.pns.tntrun.game.GameManager;
@@ -35,6 +36,8 @@ public final class TNTRun extends JavaPlugin {
         // Register main events
         Bukkit.getPluginManager().registerEvents(new PlayerConnectionEvents(this), this);
 
+        Bukkit.getPluginCommand("game").setExecutor(new GameCmd(this));
+
         loadDefaultMaps();
 
         lobby = new Lobby(this, slimeWorldLoader);
@@ -64,7 +67,7 @@ public final class TNTRun extends JavaPlugin {
             if (!dataFile.exists()) SlimeWorldUtils.saveResource(this, "lobby/data.yml", mapFolder, true);
 
             // Load default map if no other maps
-            if (mapFolder.listFiles().length < 2) return;
+            if (mapFolder.list().length > 2) return;
             File demoFolder = new File(mapFolder, "oceania");
             demoFolder.mkdir();
             mapFile = new File(demoFolder, "region.slime");

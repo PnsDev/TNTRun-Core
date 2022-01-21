@@ -6,4 +6,6 @@ public final class ChatUtils {
     public static String formatMessage(String message) {
         return ChatColor.translateAlternateColorCodes('&', message);
     }
+
+
 }

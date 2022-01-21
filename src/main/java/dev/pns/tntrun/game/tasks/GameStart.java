@@ -21,6 +21,7 @@ public class GameStart implements Listener {
         //todo: game start animation
         ticksPassed++;
         if (ticksPassed == 201) {
+            System.out.println("Game started");
             HandlerList.unregisterAll(this);
 
             PowerUpSpawn powerUpSpawn = new PowerUpSpawn(game);

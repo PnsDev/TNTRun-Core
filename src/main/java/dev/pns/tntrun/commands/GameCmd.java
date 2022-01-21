@@ -51,6 +51,7 @@ public class GameCmd implements CommandExecutor {
                 player.sendMessage(ChatColor.GREEN + "UUID: " + game.getGameID());
                 player.sendMessage(ChatColor.GREEN + "Name: " + game.getName());
                 player.sendMessage(ChatColor.GREEN + "Status: " + game.getState().name());
+                player.sendMessage(ChatColor.GREEN + "World Loaded: " + (game.getWorld() == null ? "No" : "Yes"));
                 player.sendMessage(ChatColor.GREEN + "Players: " + game.getPlayers().size());
                 player.sendMessage(ChatColor.GREEN + "Spectators: " + game.getSpectators().size());
                 return false;

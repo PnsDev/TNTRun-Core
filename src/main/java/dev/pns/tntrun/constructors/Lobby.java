@@ -51,6 +51,10 @@ public class Lobby {
         //TODO: Makes scoreboard and inventory
     }
 
+    public List<Player> getPlayers() {
+        return players;
+    }
+
     public boolean isPlayerInLobby(Player player) {
         return players.contains(player);
     }

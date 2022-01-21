@@ -63,7 +63,8 @@ public class GameMap {
      * @return A random map
      */
     public static GameMap getRandomMap() {
-        List<File> files = Arrays.asList(Objects.requireNonNull(new File("maps").listFiles()));
+        List<File> files = new ArrayList<>(Arrays.asList(Objects.requireNonNull(new File("maps").listFiles())));
+
         files.removeIf(file -> !file.isDirectory() || file.getName().equals("lobby"));
         try {
             return new GameMap(files.get(random.nextInt(files.size())));

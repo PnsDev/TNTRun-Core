@@ -8,6 +8,7 @@ import dev.pns.tntrun.misc.TimerEvent;
 import lombok.Getter;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -40,7 +41,7 @@ public class LocationTracking implements Listener {
     public void playerTracker(TimerEvent e) {
         if (!e.getTimer().equals(TickTimer.TICK_1)) return;
 
-        game.getPlayers().forEach(gamePlayer -> {
+        for (GamePlayer gamePlayer : new ArrayList<>(game.getPlayers())) {
             Player player = gamePlayer.getPlayer();
             Block blockUnder = player.getWorld().getBlockAt(player.getLocation().subtract(0, .65, 0));
 
@@ -57,10 +58,9 @@ public class LocationTracking implements Listener {
                 TickPosition tp = antiFreeze.get(gamePlayer);
                 if (player.getLocation().distance(tp.getLocation()) <= antiFreezeDistance) tp.addTick();
                 if (tp.getTicks() >= allowedFlyTicks) {
-                    System.out.println("cheating");
-                    game.makeSpectator(gamePlayer);
+                    killForCheating(gamePlayer);
+                    continue;
                 }
-                return;
             }
             antiFreeze.get(gamePlayer).reset(player.getLocation());
 
@@ -69,9 +69,8 @@ public class LocationTracking implements Listener {
              * shouldn't be (avoiding the anti-freeze and death)
              */
             if (blockUnder.getType().isSolid() && !allowedBlockTypes.contains(blockUnder.getType()) && !breakableBlockTypes.contains(blockUnder.getType())) {
-                System.out.println("cheating");
-                game.makeSpectator(gamePlayer);
-                return;
+                killForCheating(gamePlayer);
+                continue;
             }
 
             /*
@@ -80,7 +79,7 @@ public class LocationTracking implements Listener {
              */
             if (!game.getMap().isLocationInMap(player.getLocation())) {
                 game.makeSpectator(gamePlayer);
-                return;
+                continue;
             }
 
             /*
@@ -89,21 +88,38 @@ public class LocationTracking implements Listener {
              * Mainly checks to see if the player is edging
              * a block, or they're standing on a block.
              */
-            Set<Block> blocks = new HashSet<Block>();
+            Set<Block> blocks = new HashSet<Block>(Collections.singletonList(blockUnder));
             if (blockUnder.getType().equals(Material.AIR)) {
-                blocks.add(blockUnder.getLocation().clone().add(feetBoundingBoxSize, 0, -feetBoundingBoxSize).getBlock());
-                blocks.add(blockUnder.getLocation().add(feetBoundingBoxSize, 0, feetBoundingBoxSize).getBlock());
-                blocks.add(blockUnder.getLocation().add(-feetBoundingBoxSize, 0, feetBoundingBoxSize).getBlock());
-                blocks.add(blockUnder.getLocation().add(-feetBoundingBoxSize, 0, -feetBoundingBoxSize).getBlock());
-                blocks.add(blockUnder.getLocation().add(0, 0, feetBoundingBoxSize).getBlock());
-                blocks.add(blockUnder.getLocation().add(0, 0, -feetBoundingBoxSize).getBlock());
-                blocks.add(blockUnder.getLocation().add(feetBoundingBoxSize, 0, 0).getBlock());
-                blocks.add(blockUnder.getLocation().add(-feetBoundingBoxSize, 0, 0).getBlock());
-                blocks.removeIf(block -> !breakableBlockTypes.contains(block.getType()) || toBeRemoved.containsKey(block));
-            } else if (breakableBlockTypes.contains(blockUnder.getType()) || !toBeRemoved.containsKey(blockUnder)) blocks.add(blockUnder);
+                blocks.add(player.getLocation().clone().add(feetBoundingBoxSize, -0.01, -feetBoundingBoxSize).getBlock());
+                blocks.add(player.getLocation().add(feetBoundingBoxSize, -0.01, feetBoundingBoxSize).getBlock());
+                blocks.add(player.getLocation().add(-feetBoundingBoxSize, -0.01, feetBoundingBoxSize).getBlock());
+                blocks.add(player.getLocation().add(-feetBoundingBoxSize, -0.01, -feetBoundingBoxSize).getBlock());
+                blocks.add(player.getLocation().add(0, -0.01, feetBoundingBoxSize).getBlock());
+                blocks.add(player.getLocation().add(0, -0.01, -feetBoundingBoxSize).getBlock());
+                blocks.add(player.getLocation().add(feetBoundingBoxSize, -0.01, 0).getBlock());
+                blocks.add(player.getLocation().add(-feetBoundingBoxSize, -0.01, 0).getBlock());
+            } else if (!breakableBlockTypes.contains(blockUnder.getType()) || toBeRemoved.containsKey(blockUnder)) continue;
 
             // Add blocks to be removed
-            blocks.forEach(block -> toBeRemoved.put(block, System.currentTimeMillis()));
-        });
+            for (Block block : blocks) {
+                if (toBeRemoved.containsKey(block) || !breakableBlockTypes.contains(block.getType())) continue;
+                toBeRemoved.put(block, System.currentTimeMillis());
+
+                if (block.getType().equals(Material.TNT)) {
+                    Block above = block.getWorld().getBlockAt(block.getX(), block.getY() + 1, block.getZ());
+                    if (breakableBlockTypes.contains(above.getType())) toBeRemoved.put(above, System.currentTimeMillis());
+                    continue;
+                }
+
+                Block under = block.getWorld().getBlockAt(block.getX(), block.getY() - 1, block.getZ());
+                if (breakableBlockTypes.contains(under.getType())) toBeRemoved.put(under, System.currentTimeMillis());
+            }
+        }
+    }
+
+    private void killForCheating(GamePlayer gamePlayer) {
+        game.makeSpectator(gamePlayer);
+        gamePlayer.getPlayer().sendTitle("§c§lCheating Detected", "§7You're using an unfair advantage and have been killed!");
+        gamePlayer.getPlayer().playSound(gamePlayer.getPlayer().getLocation(), Sound.GHAST_DEATH, 1, 1);
     }
 }

@@ -2,8 +2,11 @@ package dev.pns.tntrun.game;
 
 import dev.pns.tntrun.TNTRun;
 import dev.pns.tntrun.constructors.PowerUpType;
+import dev.pns.tntrun.game.tasks.GameEnd;
 import dev.pns.tntrun.game.tasks.GameStart;
 import dev.pns.tntrun.game.tasks.LobbyStart;
+import lombok.AccessLevel;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -21,56 +24,44 @@ import java.util.UUID;
 
 import static dev.pns.tntrun.utils.SlimeWorldUtils.loadMap;
 
-@Getter
+@Data
 public class Game {
     private final TNTRun core;
 
+    @Setter(AccessLevel.NONE)
     private UUID gameID = UUID.randomUUID();
-    @Setter
     private String name;
-    @Setter
     private String description;
-    @Setter
     private int maxPlayers = 16;
 
     // Players should not be in both sections at the same time
     private final List<GamePlayer> players = new ArrayList<>();
     private final List<GamePlayer> spectators = new ArrayList<>();
 
+    @Setter(AccessLevel.NONE)
     private GameState state = GameState.LOBBY;
 
-    @Setter
     private GameMap map = GameMap.getRandomMap();
 
     // Used for unscheduling events
     private final List<Listener> listeners = new ArrayList<>();
 
-
+    @Setter(AccessLevel.NONE)
     private World world = null;
 
-    @Setter
     private Player owner;
     private final List<Player> moderators = new ArrayList<>();
 
     // Game Settings
-    @Setter
     private boolean randomGameMaps = true;
-    @Setter
     private boolean powerupsEnabled = true;
-    private List<PowerUpType> disabledPowerups = new ArrayList<>();
-    @Setter
+    private final List<PowerUpType> disabledPowerups = new ArrayList<>();
     private int powerupRate =  1200;
-    @Setter
     private int blockBreakSpeed = 6;
-    @Setter
     private int speedPotionAmount = 3;
-    @Setter
     private int slowPotionAmount = 0;
-    @Setter
     private int doubleJumpAmount = 10;
-    @Setter
     private boolean pvpEnabled = false;
-    @Setter
     private int pvpDamage = 0;
 
     public Game(TNTRun core, String name, String description, Player owner) {
@@ -93,7 +84,7 @@ public class Game {
                     if (randomGameMaps) map = GameMap.getRandomMap();
 
                     // Reset all spectators to players
-                    Iterator<GamePlayer> iterator = players.iterator();
+                    Iterator<GamePlayer> iterator = spectators.iterator();
                     while (iterator.hasNext()) {
                         this.players.add(iterator.next());
                         iterator.remove();
@@ -102,6 +93,7 @@ public class Game {
                     Location spawn = core.getLobby().getMap().getSpawnPoints().get(0).toLocation(core.getLobby().getWorld());
                     this.players.forEach(targetPlayer -> {
                         targetPlayer.getPlayer().teleport(spawn);
+                        targetPlayer.getPlayer().setGameMode(GameMode.SURVIVAL);
                         this.players.forEach(toBeDisplayed -> {
                             if (toBeDisplayed.equals(targetPlayer))
                                 targetPlayer.getPlayer().showPlayer(toBeDisplayed.getPlayer());
@@ -119,7 +111,7 @@ public class Game {
                     if (throwable != null) return;
                     this.world = Bukkit.getWorld(gameID.toString());
                 });
-                Bukkit.getPluginManager().registerEvents(new LobbyStart(this, 100), core);
+                Bukkit.getPluginManager().registerEvents(new LobbyStart(this, 200), core);
                 break;
             case STARTED:
                 if (!state.equals(GameState.STARTING)) return;
@@ -147,6 +139,7 @@ public class Game {
                 }
                 // TODO:
                 //  win effects?
+                Bukkit.getPluginManager().registerEvents(new GameEnd(this), core);
                 break;
         }
         state = newState;
@@ -223,6 +216,7 @@ public class Game {
             spectators.forEach(targetPlayer -> player.showPlayer(targetPlayer.getPlayer()));
             player.teleport(map.getSpawnPoints().get(0).toLocation(world));
         }
+        if (players.size() <= 1) setGameState(GameState.ENDING);
     }
 
 
