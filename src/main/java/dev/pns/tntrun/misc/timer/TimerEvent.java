@@ -1,4 +1,4 @@
-package dev.pns.tntrun.misc;
+package dev.pns.tntrun.misc.timer;
 
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;

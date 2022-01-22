@@ -1,8 +1,8 @@
-package dev.pns.tntrun.constructors;
+package dev.pns.tntrun.misc;
 
 import com.grinderwolf.swm.api.SlimePlugin;
 import dev.pns.tntrun.TNTRun;
-import dev.pns.tntrun.game.GameMap;
+import dev.pns.tntrun.game.constructors.GameMap;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.World;

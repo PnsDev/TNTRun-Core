@@ -4,7 +4,7 @@ import dev.pns.tntrun.game.Game;
 import dev.pns.tntrun.game.events.BlockRemoval;
 import dev.pns.tntrun.game.events.LocationTracking;
 import dev.pns.tntrun.game.events.PowerUpSpawn;
-import dev.pns.tntrun.misc.TimerEvent;
+import dev.pns.tntrun.misc.timer.TimerEvent;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;

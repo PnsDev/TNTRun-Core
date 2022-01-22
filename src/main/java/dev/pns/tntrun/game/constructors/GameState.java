@@ -1,4 +1,4 @@
-package dev.pns.tntrun.game;
+package dev.pns.tntrun.game.constructors;
 
 public enum GameState {
     LOBBY,

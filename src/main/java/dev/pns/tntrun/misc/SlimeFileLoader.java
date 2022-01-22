@@ -1,4 +1,4 @@
-package dev.pns.tntrun.constructors;
+package dev.pns.tntrun.misc;
 
 import com.grinderwolf.swm.api.exceptions.UnknownWorldException;
 import com.grinderwolf.swm.api.exceptions.WorldInUseException;

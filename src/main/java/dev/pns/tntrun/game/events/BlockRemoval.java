@@ -1,7 +1,7 @@
 package dev.pns.tntrun.game.events;
 
-import dev.pns.tntrun.misc.TickTimer;
-import dev.pns.tntrun.misc.TimerEvent;
+import dev.pns.tntrun.misc.timer.TickTimer;
+import dev.pns.tntrun.misc.timer.TimerEvent;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;

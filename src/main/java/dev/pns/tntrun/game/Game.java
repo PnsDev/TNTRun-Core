@@ -1,13 +1,16 @@
 package dev.pns.tntrun.game;
 
+import com.google.common.collect.Iterables;
 import dev.pns.tntrun.TNTRun;
-import dev.pns.tntrun.constructors.PowerUpType;
+import dev.pns.tntrun.game.constructors.PowerUpType;
+import dev.pns.tntrun.game.constructors.GameMap;
+import dev.pns.tntrun.game.constructors.GamePlayer;
+import dev.pns.tntrun.game.constructors.GameState;
 import dev.pns.tntrun.game.tasks.GameEnd;
 import dev.pns.tntrun.game.tasks.GameStart;
 import dev.pns.tntrun.game.tasks.LobbyStart;
 import lombok.AccessLevel;
 import lombok.Data;
-import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -22,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import static dev.pns.tntrun.utils.ChatUtils.formatMessage;
 import static dev.pns.tntrun.utils.SlimeWorldUtils.loadMap;
 
 @Data
@@ -153,6 +157,8 @@ public class Game {
     public boolean joinGame(Player player) {
         if (players.size() >= maxPlayers) return false; //TODO: add bypass permission?
         core.getLobby().getPlayers().remove(player);
+        player.getInventory().clear();
+        sendMessage("&7[&a+&7] &7" + player.getName());
         if (state.equals(GameState.STARTED) || state.equals(GameState.ENDING)) {
             makeSpectator(new GamePlayer(player, this));
             return true;
@@ -167,10 +173,7 @@ public class Game {
      * @return
      */
     public GamePlayer getGamePlayer(Player player) {
-        for (GamePlayer gamePlayer : players) {
-            if (gamePlayer.getPlayer().equals(player)) return gamePlayer;
-        }
-        for (GamePlayer gamePlayer : spectators) {
+        for (GamePlayer gamePlayer : getAllPlayers()) {
             if (gamePlayer.getPlayer().equals(player)) return gamePlayer;
         }
         return null;
@@ -182,6 +185,7 @@ public class Game {
      */
     public void removeFromGame(GamePlayer gamePlayer) {
         if (players.contains(gamePlayer)) makeSpectator(gamePlayer);
+        sendMessage("&7[&c-&7] &7" + gamePlayer.getPlayer().getName());
         if (!gamePlayer.getPlayer().isOnline()) {
             spectators.remove(gamePlayer);
             return;
@@ -207,7 +211,7 @@ public class Game {
 
         if (players.contains(gamePlayer)) {
             players.remove(gamePlayer);
-            // TODO: death message
+            sendMessage("&c&lF &f" + player.getName() + " &7has done the rip.");
         }
         spectators.add(gamePlayer);
         if (!player.isOnline()) return;
@@ -217,6 +221,15 @@ public class Game {
             player.teleport(map.getSpawnPoints().get(0).toLocation(world));
         }
         if (players.size() <= 1) setGameState(GameState.ENDING);
+    }
+    
+    public void sendMessage(String message) {
+        final String formattedMessage = formatMessage(message);
+        getAllPlayers().forEach(gamePlayer -> gamePlayer.getPlayer().sendMessage(formattedMessage));
+    }
+
+    public Iterable<GamePlayer> getAllPlayers() {
+        return Iterables.unmodifiableIterable(Iterables.concat(players, spectators));
     }
 
 

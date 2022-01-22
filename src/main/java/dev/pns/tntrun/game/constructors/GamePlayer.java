@@ -1,5 +1,6 @@
-package dev.pns.tntrun.game;
+package dev.pns.tntrun.game.constructors;
 
+import dev.pns.tntrun.game.Game;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Location;

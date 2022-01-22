@@ -1,6 +1,5 @@
-package dev.pns.tntrun.game;
+package dev.pns.tntrun.game.constructors;
 
-import dev.pns.tntrun.constructors.Coordinates;
 import lombok.Getter;
 import org.bukkit.Location;
 import org.simpleyaml.configuration.ConfigurationSection;

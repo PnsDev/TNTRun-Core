@@ -2,7 +2,8 @@ package dev.pns.tntrun;
 
 import com.grinderwolf.swm.api.SlimePlugin;
 import dev.pns.tntrun.commands.GameCmd;
-import dev.pns.tntrun.constructors.Lobby;
+import dev.pns.tntrun.misc.Lobby;
+import dev.pns.tntrun.events.lobbyWorld.LobbyHandling;
 import dev.pns.tntrun.events.PlayerConnectionEvents;
 import dev.pns.tntrun.game.GameManager;
 import dev.pns.tntrun.tasks.TimerEventRunnable;
@@ -33,7 +34,6 @@ public final class TNTRun extends JavaPlugin {
         gameManager = new GameManager(this);
         guiManager = new GuiManager(this);
 
-        // Register main events
         Bukkit.getPluginManager().registerEvents(new PlayerConnectionEvents(this), this);
 
         Bukkit.getPluginCommand("game").setExecutor(new GameCmd(this));
@@ -41,6 +41,8 @@ public final class TNTRun extends JavaPlugin {
         loadDefaultMaps();
 
         lobby = new Lobby(this, slimeWorldLoader);
+
+        Bukkit.getPluginManager().registerEvents(new LobbyHandling(lobby), this);
     }
 
     @Override

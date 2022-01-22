@@ -2,8 +2,8 @@ package dev.pns.tntrun.commands;
 
 import dev.pns.tntrun.TNTRun;
 import dev.pns.tntrun.game.Game;
-import dev.pns.tntrun.game.GamePlayer;
-import dev.pns.tntrun.game.GameState;
+import dev.pns.tntrun.game.constructors.GamePlayer;
+import dev.pns.tntrun.game.constructors.GameState;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -51,7 +51,7 @@ public class GameCmd implements CommandExecutor {
                 player.sendMessage(ChatColor.GREEN + "UUID: " + game.getGameID());
                 player.sendMessage(ChatColor.GREEN + "Name: " + game.getName());
                 player.sendMessage(ChatColor.GREEN + "Status: " + game.getState().name());
-                player.sendMessage(ChatColor.GREEN + "World Loaded: " + (game.getWorld() == null ? "No" : "Yes"));
+                player.sendMessage(ChatColor.GREEN + "World Loaded: " + (Bukkit.getWorld(game.getGameID().toString()) == null ? "No" : "Yes"));
                 player.sendMessage(ChatColor.GREEN + "Players: " + game.getPlayers().size());
                 player.sendMessage(ChatColor.GREEN + "Spectators: " + game.getSpectators().size());
                 return false;

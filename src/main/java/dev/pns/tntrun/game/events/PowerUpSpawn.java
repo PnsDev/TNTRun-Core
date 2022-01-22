@@ -1,12 +1,12 @@
 package dev.pns.tntrun.game.events;
 
-import dev.pns.tntrun.constructors.Coordinates;
-import dev.pns.tntrun.constructors.PowerUpType;
+import dev.pns.tntrun.game.constructors.Coordinates;
+import dev.pns.tntrun.game.constructors.PowerUpType;
 import dev.pns.tntrun.game.Game;
-import dev.pns.tntrun.game.GameMap;
+import dev.pns.tntrun.game.constructors.GameMap;
 import dev.pns.tntrun.game.tasks.PowerUp;
-import dev.pns.tntrun.misc.TickTimer;
-import dev.pns.tntrun.misc.TimerEvent;
+import dev.pns.tntrun.misc.timer.TickTimer;
+import dev.pns.tntrun.misc.timer.TimerEvent;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

@@ -4,7 +4,7 @@ import com.grinderwolf.swm.api.SlimePlugin;
 import com.grinderwolf.swm.api.world.SlimeWorld;
 import com.grinderwolf.swm.api.world.properties.SlimePropertyMap;
 import dev.pns.tntrun.TNTRun;
-import dev.pns.tntrun.constructors.SlimeFileLoader;
+import dev.pns.tntrun.misc.SlimeFileLoader;
 import org.bukkit.Bukkit;
 
 import java.io.*;

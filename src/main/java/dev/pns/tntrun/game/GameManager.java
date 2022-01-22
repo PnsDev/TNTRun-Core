@@ -1,8 +1,8 @@
 package dev.pns.tntrun.game;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import dev.pns.tntrun.TNTRun;
+import dev.pns.tntrun.game.constructors.GamePlayer;
+import dev.pns.tntrun.game.constructors.GameState;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
@@ -35,8 +35,7 @@ public class GameManager {
      */
     public void destroyGame(Game game) {
         games.remove(game);
-        Iterable<GamePlayer> allPlayers = Iterables.unmodifiableIterable(Iterables.concat(game.getPlayers(), game.getSpectators()));
-        allPlayers.forEach(game::removeFromGame);
+        game.getAllPlayers().forEach(game::removeFromGame);
         game.setGameState(GameState.DESTROYED);
         game.getListeners().forEach(HandlerList::unregisterAll);
         if (game.getWorld() != null) Bukkit.unloadWorld(game.getWorld(), false);

@@ -1,11 +1,11 @@
 package dev.pns.tntrun.game.tasks;
 
-import dev.pns.tntrun.constructors.PowerUpType;
+import dev.pns.tntrun.game.constructors.PowerUpType;
 import dev.pns.tntrun.game.Game;
-import dev.pns.tntrun.game.GamePlayer;
-import dev.pns.tntrun.game.GameState;
-import dev.pns.tntrun.misc.TickTimer;
-import dev.pns.tntrun.misc.TimerEvent;
+import dev.pns.tntrun.game.constructors.GamePlayer;
+import dev.pns.tntrun.game.constructors.GameState;
+import dev.pns.tntrun.misc.timer.TickTimer;
+import dev.pns.tntrun.misc.timer.TimerEvent;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;

@@ -1,10 +1,11 @@
 package dev.pns.tntrun.game.events;
 
-import dev.pns.tntrun.constructors.TickPosition;
+import dev.pns.tntrun.game.constructors.TickPosition;
 import dev.pns.tntrun.game.Game;
-import dev.pns.tntrun.game.GamePlayer;
-import dev.pns.tntrun.misc.TickTimer;
-import dev.pns.tntrun.misc.TimerEvent;
+import dev.pns.tntrun.game.constructors.GamePlayer;
+import dev.pns.tntrun.misc.timer.TickTimer;
+import dev.pns.tntrun.misc.timer.TimerEvent;
+import dev.pns.tntrun.utils.Title;
 import lombok.Getter;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -117,9 +118,10 @@ public class LocationTracking implements Listener {
         }
     }
 
+    private final static Title cheatingTitle = new Title("&c&lCheating Detected", "&7You're using an unfair advantage and have been killed!", 5, 20, 5);
     private void killForCheating(GamePlayer gamePlayer) {
         game.makeSpectator(gamePlayer);
-        gamePlayer.getPlayer().sendTitle("§c§lCheating Detected", "§7You're using an unfair advantage and have been killed!");
+        cheatingTitle.send(gamePlayer.getPlayer());
         gamePlayer.getPlayer().playSound(gamePlayer.getPlayer().getLocation(), Sound.GHAST_DEATH, 1, 1);
     }
 }
