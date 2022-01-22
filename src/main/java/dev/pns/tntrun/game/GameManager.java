@@ -1,6 +1,6 @@
 package dev.pns.tntrun.game;
 
-import dev.pns.tntrun.TNTRun;
+import dev.pns.tntrun.Core;
 import dev.pns.tntrun.game.constructors.GamePlayer;
 import dev.pns.tntrun.game.constructors.GameState;
 import lombok.Getter;
@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 public class GameManager {
-    private final TNTRun core;
+    private final Core core;
     @Getter
     private final List<Game> games = new ArrayList<>();
 

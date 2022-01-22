@@ -1,6 +1,6 @@
 package dev.pns.tntrun.commands;
 
-import dev.pns.tntrun.TNTRun;
+import dev.pns.tntrun.Core;
 import dev.pns.tntrun.game.Game;
 import dev.pns.tntrun.game.constructors.GamePlayer;
 import dev.pns.tntrun.game.constructors.GameState;
@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 public class GameCmd implements CommandExecutor {
-    private final TNTRun core;
+    private final Core core;
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {

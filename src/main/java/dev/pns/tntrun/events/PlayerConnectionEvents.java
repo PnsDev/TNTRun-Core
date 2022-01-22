@@ -1,6 +1,6 @@
 package dev.pns.tntrun.events;
 
-import dev.pns.tntrun.TNTRun;
+import dev.pns.tntrun.Core;
 import dev.pns.tntrun.game.constructors.GamePlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -10,9 +10,9 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerConnectionEvents implements Listener {
-    private final TNTRun core;
+    private final Core core;
 
-    public PlayerConnectionEvents(TNTRun core) {
+    public PlayerConnectionEvents(Core core) {
         this.core = core;
     }
 

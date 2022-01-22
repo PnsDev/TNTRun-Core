@@ -1,6 +1,6 @@
 name: TNTRun
 version: '${project.version}'
-main: dev.pns.tntrun.TNTRun
+main: dev.pns.tntrun.Core
 api-version: 1.8
 authors: [ PnsDev ]
 website: https://pns.dev
@@ -8,4 +8,6 @@ depend:
   - SlimeWorldManager
 commands:
   game:
-    description: a
+    description: The command to interact with games (mainly used for dev purposes.)
+  debug:
+    description: This command is purely for debugging purposes.

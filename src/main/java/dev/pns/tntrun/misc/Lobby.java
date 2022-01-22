@@ -1,10 +1,11 @@
 package dev.pns.tntrun.misc;
 
 import com.grinderwolf.swm.api.SlimePlugin;
-import dev.pns.tntrun.TNTRun;
+import dev.pns.tntrun.Core;
 import dev.pns.tntrun.game.constructors.GameMap;
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
@@ -21,7 +22,7 @@ public class Lobby {
     private GameMap map = null;
     private final List<Player> players = new ArrayList<>();
 
-    public Lobby(TNTRun core, SlimePlugin slimeWorldLoader) {
+    public Lobby(Core core, SlimePlugin slimeWorldLoader) {
         try {
             map = new GameMap(new File("maps/lobby"));
         } catch (Exception e) {
@@ -47,7 +48,14 @@ public class Lobby {
     public void addPlayer(Player player) {
         players.add(player);
         player.teleport(map.getSpawnPoints().get(0).toLocation(world));
+        player.setExp(0);
+        player.setLevel(0);
+        player.setGameMode(GameMode.ADVENTURE);
         player.getInventory().clear();
+        player.setSaturation(40);
+        player.setHealth(20);
+        player.getInventory().clear();
+        player.getActivePotionEffects().forEach(potionEffect -> player.removePotionEffect(potionEffect.getType()));
         //TODO: Makes scoreboard and inventory
     }
 

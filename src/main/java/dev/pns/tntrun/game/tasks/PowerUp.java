@@ -7,8 +7,12 @@ import dev.pns.tntrun.game.constructors.GameState;
 import dev.pns.tntrun.misc.timer.TickTimer;
 import dev.pns.tntrun.misc.timer.TimerEvent;
 import lombok.Getter;
+import net.minecraft.server.v1_8_R3.EntityArmorStand;
+import net.minecraft.server.v1_8_R3.World;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -16,6 +20,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+
+import static dev.pns.tntrun.utils.ItemUtils.createCustomSkull;
 
 public class PowerUp implements Listener {
     private final Game game;
@@ -29,7 +35,18 @@ public class PowerUp implements Listener {
         this.game = game;
         this.powerUpType = powerUpType;
         this.spawnLocation = spawnLocation;
-        this.armorStand = (ArmorStand) spawnLocation.getWorld().spawnEntity(spawnLocation, EntityType.ARMOR_STAND);
+
+
+        World world = ((CraftWorld) spawnLocation.getWorld()).getHandle();
+        EntityArmorStand nmsArmorStand = new EntityArmorStand(world, spawnLocation.getX() + 0.5, spawnLocation.getY(), spawnLocation.getZ() + 0.5);
+        nmsArmorStand.setInvisible(true);
+        nmsArmorStand.setGravity(false);
+        nmsArmorStand.setCustomNameVisible(true);
+        nmsArmorStand.setCustomName(powerUpType.getColor() + powerUpType.getName());
+        nmsArmorStand.setEquipment(4, CraftItemStack.asNMSCopy(createCustomSkull(powerUpType.getTexture())));
+        world.addEntity(nmsArmorStand);
+
+        armorStand = (ArmorStand) nmsArmorStand.getBukkitEntity();
     }
 
     @EventHandler

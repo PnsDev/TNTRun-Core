@@ -83,7 +83,7 @@ public class LobbyHandling implements Listener {
     public void onDamage(EntityDamageEvent e) {
         if (!(e.getEntity() instanceof Player)) return;
         Player p = (Player) e.getEntity();
-        if (!lobby.isPlayerInLobby(p)) return;
+        if (!p.getWorld().equals(lobby.getWorld())) return;
         e.setCancelled(true);
         if (e.getCause().equals(EntityDamageEvent.DamageCause.VOID)) p.teleport(lobby.getMap().getSpawnPoints().get(0).toLocation(lobby.getWorld()));
     }

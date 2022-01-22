@@ -1,7 +1,7 @@
 package dev.pns.tntrun.game;
 
 import com.google.common.collect.Iterables;
-import dev.pns.tntrun.TNTRun;
+import dev.pns.tntrun.Core;
 import dev.pns.tntrun.game.constructors.PowerUpType;
 import dev.pns.tntrun.game.constructors.GameMap;
 import dev.pns.tntrun.game.constructors.GamePlayer;
@@ -30,7 +30,7 @@ import static dev.pns.tntrun.utils.SlimeWorldUtils.loadMap;
 
 @Data
 public class Game {
-    private final TNTRun core;
+    private final Core core;
 
     @Setter(AccessLevel.NONE)
     private UUID gameID = UUID.randomUUID();
@@ -68,7 +68,7 @@ public class Game {
     private boolean pvpEnabled = false;
     private int pvpDamage = 0;
 
-    public Game(TNTRun core, String name, String description, Player owner) {
+    public Game(Core core, String name, String description, Player owner) {
         this.core = core;
         this.name = name;
         this.description = description;
@@ -96,8 +96,8 @@ public class Game {
                     // Teleport all players to lobby & deal with visibility
                     Location spawn = core.getLobby().getMap().getSpawnPoints().get(0).toLocation(core.getLobby().getWorld());
                     this.players.forEach(targetPlayer -> {
+                        clearPlayer(targetPlayer.getPlayer());
                         targetPlayer.getPlayer().teleport(spawn);
-                        targetPlayer.getPlayer().setGameMode(GameMode.SURVIVAL);
                         this.players.forEach(toBeDisplayed -> {
                             if (toBeDisplayed.equals(targetPlayer))
                                 targetPlayer.getPlayer().showPlayer(toBeDisplayed.getPlayer());
@@ -200,14 +200,9 @@ public class Game {
      */
     public void makeSpectator(GamePlayer gamePlayer) {
         Player player = gamePlayer.getPlayer();
-        player.setExp(0);
-        player.setLevel(0);
         player.setAllowFlight(true);
         player.setFlying(true);
-        player.setGameMode(GameMode.ADVENTURE);
-        player.getInventory().clear();
-        player.setSaturation(40);
-        player.setHealth(20);
+        clearPlayer(player);
 
         if (players.contains(gamePlayer)) {
             players.remove(gamePlayer);
@@ -230,6 +225,17 @@ public class Game {
 
     public Iterable<GamePlayer> getAllPlayers() {
         return Iterables.unmodifiableIterable(Iterables.concat(players, spectators));
+    }
+
+    private void clearPlayer(Player player) {
+        player.setExp(0);
+        player.setLevel(0);
+        player.setGameMode(GameMode.ADVENTURE);
+        player.getInventory().clear();
+        player.setSaturation(40);
+        player.setHealth(20);
+        player.getInventory().clear();
+        player.getActivePotionEffects().forEach(potionEffect -> player.removePotionEffect(potionEffect.getType()));
     }
 
 

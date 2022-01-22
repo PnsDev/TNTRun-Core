@@ -3,7 +3,7 @@ package dev.pns.tntrun.utils;
 import com.grinderwolf.swm.api.SlimePlugin;
 import com.grinderwolf.swm.api.world.SlimeWorld;
 import com.grinderwolf.swm.api.world.properties.SlimePropertyMap;
-import dev.pns.tntrun.TNTRun;
+import dev.pns.tntrun.Core;
 import dev.pns.tntrun.misc.SlimeFileLoader;
 import org.bukkit.Bukkit;
 
@@ -35,7 +35,7 @@ public final class SlimeWorldUtils {
     }
 
 
-    public static void saveResource(TNTRun core, String resourcePath, File destinationFolder, boolean replace) {
+    public static void saveResource(Core core, String resourcePath, File destinationFolder, boolean replace) {
         if (resourcePath == null || resourcePath.equals("")) {
             throw new IllegalArgumentException("ResourcePath cannot be null or empty");
         }
