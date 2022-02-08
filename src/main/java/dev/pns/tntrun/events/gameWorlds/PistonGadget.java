@@ -3,7 +3,6 @@ package dev.pns.tntrun.events.gameWorlds;
 import dev.pns.tntrun.misc.Lobby;
 import dev.pns.tntrun.misc.timer.TickTimer;
 import dev.pns.tntrun.misc.timer.TimerEvent;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -12,68 +11,74 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.material.PistonBaseMaterial;
+import org.bukkit.material.PistonExtensionMaterial;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 @RequiredArgsConstructor
 public class PistonGadget implements Listener {
     private final Lobby lobby;
-    private final List<PistonData> pistonDataList = new ArrayList<>();
+    private final Map<Block, Integer> pistonList = new HashMap<>();
 
+    @EventHandler
     public void onPistonPlace(BlockPlaceEvent e) {
         if (e.getPlayer().getWorld().equals(lobby.getWorld())) return;
         Block blockPlaced = e.getBlockPlaced();
-        if (!blockPlaced.getType().equals(Material.PISTON_STICKY_BASE)) return;
+        if (!blockPlaced.getType().equals(Material.PISTON_BASE)) return;
 
-        //Check block under is not piston to stop extension bug
+        /**
+         * Bug fix: PistonGadget will not work if the block is placed on a
+         * block that is already a piston due to the redstone block powering
+         * it up.
+         */
         if (blockPlaced.getWorld().getBlockAt(blockPlaced.getLocation().add(0, -1, 0)).getType().equals(Material.PISTON_STICKY_BASE)){
             e.setCancelled(true);
             return;
         }
 
-        // make piston face upwards when placed
-        blockPlaced.setData((byte) 0x8);
-        pistonDataList.add(new PistonData(blockPlaced, blockPlaced.getWorld().getBlockAt(blockPlaced.getLocation().subtract(0, 1, 0)).getType()));
+        // make piston always face upwards when placed
+        blockPlaced.setData((byte) 0x1);
+        pistonList.put(blockPlaced, 0);
     }
 
     @EventHandler
     public void onTick(TimerEvent e){
-       if (!e.getTimer().equals(TickTimer.TICK_1)) return;
+        if (!e.getTimer().equals(TickTimer.TICK_1)) return;
         // Get all pistons that are waiting to be deployed
-        Iterator<PistonData> iterator = pistonDataList.iterator();
+        Iterator<Map.Entry<Block, Integer>> iterator = pistonList.entrySet().iterator();
         while (iterator.hasNext()) {
-            PistonData pistonData = iterator.next();
-            Block block = pistonData.getBlock();
+            Map.Entry<Block, Integer> entry = iterator.next();
+            Block block = entry.getKey();
+            Block blockAbove = block.getWorld().getBlockAt(block.getLocation().add(0, 1, 0));
 
-            pistonData.setTicksPassed(pistonData.getTicksPassed() + 1);
-            switch (pistonData.getTicksPassed()) {
-                case 10: {
+            entry.setValue(entry.getValue() + 1);
+
+            switch (entry.getValue()) {
+                case 10 -> {
                     block.getWorld().playSound(block.getLocation(), Sound.FIREWORK_LAUNCH, 1, 1);
                     for (Player p : block.getWorld().getPlayers()) {
-                        if (p.getLocation().distance(block.getLocation()) > 1.5) continue;
+                        if (p.getLocation().distance(block.getLocation().add(0.5, 0.5, 0.5)) > 1.7) continue;
                         p.setVelocity(p.getVelocity().setY(2));
                     }
-                    break;
                 }
-                case 12: {
-                    Block blockUnder = block.getWorld().getBlockAt(block.getLocation().subtract(0, 1, 0));
-                }
+                case 12 -> {
+                    blockAbove.setType(Material.PISTON_EXTENSION);
+                    PistonExtensionMaterial pe = (PistonExtensionMaterial) blockAbove.getState().getData();
+                    blockAbove.getState().setRawData(pe.getData());
 
+                    PistonBaseMaterial piston = (PistonBaseMaterial) block.getState().getData();
+                    piston.setPowered(true);
+                    block.setData(piston.getData());
+                }
+                case 20 -> {
+                    block.setType(Material.AIR);
+                    block.getWorld().playEffect(block.getLocation(), org.bukkit.Effect.STEP_SOUND, Material.PISTON_STICKY_BASE);
+                    iterator.remove();
+                }
             }
-
-
-
         }
     }
-
-
-
-    @Data
-    private class PistonData {
-        private final Block block;
-        private final Material materialUnder;
-        private int ticksPassed = 0;
-    }
-
-
 }

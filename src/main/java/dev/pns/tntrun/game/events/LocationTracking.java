@@ -1,8 +1,8 @@
 package dev.pns.tntrun.game.events;
 
-import dev.pns.tntrun.game.constructors.TickPosition;
 import dev.pns.tntrun.game.Game;
 import dev.pns.tntrun.game.constructors.GamePlayer;
+import dev.pns.tntrun.game.constructors.TickPosition;
 import dev.pns.tntrun.misc.timer.TickTimer;
 import dev.pns.tntrun.misc.timer.TimerEvent;
 import dev.pns.tntrun.utils.Title;
@@ -11,11 +11,14 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 import java.util.*;
+
+import static dev.pns.tntrun.utils.ChatUtils.sendActionBar;
 
 public class LocationTracking implements Listener {
     private final Game game;
@@ -66,6 +69,28 @@ public class LocationTracking implements Listener {
             antiFreeze.get(gamePlayer).reset(player.getLocation());
 
             /*
+             * Check if player is standing on something
+             * to toggle double jump.
+             * (Uses cast to avoid client calculation).
+             */
+            if (((HumanEntity) player).isOnGround() && !player.getAllowFlight()) player.setAllowFlight(true);
+
+            /*
+             * Shows locations of players to the individual players.
+             * (Helps a lot with positioning).
+             */
+            Integer[] spaceLocation = {0, 0, 0};
+            game.getPlayers().forEach(gp -> {
+                if (!gp.equals(gamePlayer)) {
+                    int yDiff = player.getLocation().getBlockY() - gp.getPlayer().getLocation().getBlockY();
+                    if (yDiff > 4) spaceLocation[2]++;
+                    else if (yDiff < -4) spaceLocation[0]++;
+                    else spaceLocation[1]++;
+                }
+            });
+            sendActionBar(player, "§fAbove: §a" + spaceLocation[0] + " §7-§f Same: §a" + spaceLocation[1] + " §7-§f Below:§a " + spaceLocation[2]);
+
+            /*
              * Check if the player is standing on something they
              * shouldn't be (avoiding the anti-freeze and death)
              */
@@ -79,6 +104,7 @@ public class LocationTracking implements Listener {
              * This is either because they fell out or got out of the map.
              */
             if (!game.getMap().isLocationInMap(player.getLocation())) {
+                new Title("&e&lYou've Died", "&7You're are now a spectator", 5, 20, 5).send(player);
                 game.makeSpectator(gamePlayer);
                 continue;
             }

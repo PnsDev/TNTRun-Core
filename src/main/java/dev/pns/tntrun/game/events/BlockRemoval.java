@@ -29,7 +29,7 @@ public class BlockRemoval implements Listener {
             Map.Entry<Block, Long> entry = it.next();
             if (System.currentTimeMillis() - entry.getValue() < blockRemovalTime) continue;
             entry.getKey().setType(Material.AIR);
-            powerUpSpawn.removeBlock(entry.getKey());
+            if (powerUpSpawn != null) powerUpSpawn.removeBlock(entry.getKey());
             it.remove();
             // TODO: cosmetics
         }

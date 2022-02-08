@@ -12,13 +12,11 @@ import dev.pns.tntrun.game.tasks.LobbyStart;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.potion.PotionEffect;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -26,6 +24,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static dev.pns.tntrun.utils.ChatUtils.formatMessage;
+import static dev.pns.tntrun.utils.ChatUtils.getCenteredMessage;
 import static dev.pns.tntrun.utils.SlimeWorldUtils.loadMap;
 
 @Data
@@ -37,6 +36,11 @@ public class Game {
     private String name;
     private String description;
     private int maxPlayers = 16;
+
+    // Game data
+    private long gameStart = System.currentTimeMillis();
+    private long lastPowerUpSpawn = System.currentTimeMillis();
+    private final List<GamePlayer> deathOrder = new ArrayList<>();
 
     // Players should not be in both sections at the same time
     private final List<GamePlayer> players = new ArrayList<>();
@@ -58,15 +62,26 @@ public class Game {
 
     // Game Settings
     private boolean randomGameMaps = true;
-    private boolean powerupsEnabled = true;
+    private boolean powerUpsEnabled = true;
     private final List<PowerUpType> disabledPowerups = new ArrayList<>();
-    private int powerupRate =  1200;
+    private final List<PotionEffect> enabledPotionEffects = new ArrayList<>();
+    private int powerUpRate = 1200;
     private int blockBreakSpeed = 6;
     private int speedPotionAmount = 3;
     private int slowPotionAmount = 0;
     private int doubleJumpAmount = 10;
     private boolean pvpEnabled = false;
     private int pvpDamage = 0;
+    private int pvpKillDJReward = 1;
+
+    /*
+     * TODO:
+     * Scoreboard should have
+     * game timer
+     * player alive
+     * double jumps
+     * powerUp timer
+     */
 
     public Game(Core core, String name, String description, Player owner) {
         this.core = core;
@@ -85,6 +100,7 @@ public class Game {
                 if (!state.equals(GameState.STARTING) && !state.equals(GameState.ENDING)) return;
 
                 if (state.equals(GameState.ENDING)) {
+                    deathOrder.clear();
                     if (randomGameMaps) map = GameMap.getRandomMap();
 
                     // Reset all spectators to players
@@ -98,16 +114,13 @@ public class Game {
                     this.players.forEach(targetPlayer -> {
                         clearPlayer(targetPlayer.getPlayer());
                         targetPlayer.getPlayer().teleport(spawn);
-                        this.players.forEach(toBeDisplayed -> {
-                            if (toBeDisplayed.equals(targetPlayer))
-                                targetPlayer.getPlayer().showPlayer(toBeDisplayed.getPlayer());
-                        });
+                        this.players.forEach(toBeDisplayed -> targetPlayer.getPlayer().showPlayer(toBeDisplayed.getPlayer()));
                     });
 
                     Bukkit.unloadWorld(world, false);
                 }
 
-                if (world != null) Bukkit.unloadWorld(world, false);
+                if (world != null && Bukkit.getWorld(world.getName()) != null) Bukkit.unloadWorld(world, false);
                 break;
             case STARTING:
                 if (!state.equals(GameState.LOBBY)) return;
@@ -127,8 +140,22 @@ public class Game {
                 int i = 0;
                 for (GamePlayer player : players) {
                     player.getPlayer().teleport(map.getSpawnPoints().get(i).toLocation(world));
+                    player.getPlayer().setExp(0);
+                    player.getPlayer().setGameMode(GameMode.ADVENTURE);
+                    players.forEach(toBeDisplayed -> player.getPlayer().showPlayer(toBeDisplayed.getPlayer()));
                     i = (map.getSpawnPoints().size() > i + 1) ? i + 1 : 0;
                 }
+                //Anouncement
+                sendMessage("&9&l▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+                sendMessage(getCenteredMessage("&e&lTNTRun"));
+                sendMessage(" \n");
+                sendMessage(getCenteredMessage("&fThe blocks behind you are &cfalling&f!"));
+                sendMessage(getCenteredMessage("&fDon't fall into the void."));
+                sendMessage(getCenteredMessage("&fLast player standing &awins&f!"));
+                sendMessage(" \n");
+                sendMessage(getCenteredMessage("&f&lMap&8:"));
+                sendMessage(getCenteredMessage("&f" + this.map.getName() + " &7created by &f" + String.join("&8,&f ", this.map.getBuilders())));
+                sendMessage("&9&l▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
 
                 Bukkit.getPluginManager().registerEvents(new GameStart(this), core);
                 break;
@@ -141,8 +168,21 @@ public class Game {
                     HandlerList.unregisterAll(it.next());
                     it.remove();
                 }
+
+                sendMessage("&9&l▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+                sendMessage(getCenteredMessage("&e&lTNTRun"));
+                sendMessage(" \n");
+                sendMessage(getCenteredMessage(players.size() >= 1 ? "&c&l1st Place&r " + players.get(0).getPlayer().getName() : "Uh something broke lmao"));
+                if (deathOrder.size() >= 1) sendMessage(getCenteredMessage("&6&l2nd Place&r " + deathOrder.get(deathOrder.size() - 1).getPlayer().getName()));
+                if (deathOrder.size() >= 2) sendMessage(getCenteredMessage("&e&l3rd Place&r " + deathOrder.get(deathOrder.size() - 2).getPlayer().getName()));
+                sendMessage(" \n");
+                sendMessage(getCenteredMessage("&f&lMap&8:"));
+                sendMessage(getCenteredMessage("&f" + this.map.getName() + " &7created by &f" + String.join("&8,&f ", this.map.getBuilders())));
+                sendMessage("&9&l▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+
                 // TODO:
                 //  win effects?
+                //  update stats?
                 Bukkit.getPluginManager().registerEvents(new GameEnd(this), core);
                 break;
         }
@@ -163,6 +203,9 @@ public class Game {
             makeSpectator(new GamePlayer(player, this));
             return true;
         }
+        for(GamePlayer gamePlayer : players) {
+            gamePlayer.getPlayer().showPlayer(player);
+        }
         this.players.add(new GamePlayer(player, this));
         return true;
     }
@@ -180,11 +223,22 @@ public class Game {
     }
 
     /**
+     * Is in game as player
+     * @param player
+     * @return Whether the player is in the game
+     */
+    public boolean isPlayer(Player player) {
+        GamePlayer gamePlayer = getGamePlayer(player);
+        return gamePlayer != null && players.contains(gamePlayer);
+    }
+
+    /**
      * Removes a player from the game
      * @param gamePlayer The player to remove
      */
     public void removeFromGame(GamePlayer gamePlayer) {
-        if (players.contains(gamePlayer)) makeSpectator(gamePlayer);
+        if (players.contains(gamePlayer) && state.equals(GameState.STARTED)) makeSpectator(gamePlayer);
+        else players.remove(gamePlayer);
         sendMessage("&7[&c-&7] &7" + gamePlayer.getPlayer().getName());
         if (!gamePlayer.getPlayer().isOnline()) {
             spectators.remove(gamePlayer);
@@ -200,6 +254,7 @@ public class Game {
      */
     public void makeSpectator(GamePlayer gamePlayer) {
         Player player = gamePlayer.getPlayer();
+        player.setHealth(player.getMaxHealth());
         player.setAllowFlight(true);
         player.setFlying(true);
         clearPlayer(player);
@@ -207,6 +262,7 @@ public class Game {
         if (players.contains(gamePlayer)) {
             players.remove(gamePlayer);
             sendMessage("&c&lF &f" + player.getName() + " &7has done the rip.");
+            deathOrder.add(gamePlayer);
         }
         spectators.add(gamePlayer);
         if (!player.isOnline()) return;
@@ -221,6 +277,10 @@ public class Game {
     public void sendMessage(String message) {
         final String formattedMessage = formatMessage(message);
         getAllPlayers().forEach(gamePlayer -> gamePlayer.getPlayer().sendMessage(formattedMessage));
+    }
+
+    public void playSound(Sound sound, float volume, float pitch) {
+        getAllPlayers().forEach(gamePlayer -> gamePlayer.getPlayer().playSound(gamePlayer.getPlayer().getLocation(), sound, volume, pitch));
     }
 
     public Iterable<GamePlayer> getAllPlayers() {

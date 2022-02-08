@@ -3,6 +3,10 @@ package dev.pns.tntrun;
 import com.grinderwolf.swm.api.SlimePlugin;
 import dev.pns.tntrun.commands.Debug;
 import dev.pns.tntrun.commands.GameCmd;
+import dev.pns.tntrun.events.GlobalHandling;
+import dev.pns.tntrun.events.gameWorlds.DoubleJump;
+import dev.pns.tntrun.events.gameWorlds.GameWorldHandling;
+import dev.pns.tntrun.events.gameWorlds.PistonGadget;
 import dev.pns.tntrun.misc.Lobby;
 import dev.pns.tntrun.events.lobbyWorld.LobbyHandling;
 import dev.pns.tntrun.events.PlayerConnectionEvents;
@@ -41,8 +45,7 @@ public final class Core extends JavaPlugin {
         loadDefaultMaps();
 
         lobby = new Lobby(this, slimeWorldLoader);
-
-        Bukkit.getPluginManager().registerEvents(new LobbyHandling(lobby), this);
+        registerEvents();
     }
 
     @Override
@@ -53,6 +56,21 @@ public final class Core extends JavaPlugin {
         gameManager.getGames().forEach(gameManager::destroyGame);
         if (lobby != null && lobby.getWorld() != null) Bukkit.getServer().unloadWorld(lobby.getWorld(), false);
         slimeWorldLoader = null;
+    }
+
+    public void registerEvents() {
+        if (lobby == null) return;
+
+        // Register events for all purposes
+        Bukkit.getPluginManager().registerEvents(new GlobalHandling(), this);
+
+        // Register events for handling all worlds
+        Bukkit.getPluginManager().registerEvents(new LobbyHandling(lobby), this);
+        Bukkit.getPluginManager().registerEvents(new GameWorldHandling(lobby), this);
+
+        // Register events for game mechanics
+        Bukkit.getPluginManager().registerEvents(new DoubleJump(lobby), this);
+        Bukkit.getPluginManager().registerEvents(new PistonGadget(lobby), this);
     }
 
     private void loadDefaultMaps() {

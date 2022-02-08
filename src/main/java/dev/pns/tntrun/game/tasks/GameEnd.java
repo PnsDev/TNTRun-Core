@@ -6,6 +6,7 @@ import dev.pns.tntrun.misc.timer.TickTimer;
 import dev.pns.tntrun.misc.timer.TimerEvent;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 
 @RequiredArgsConstructor
@@ -17,6 +18,9 @@ public class GameEnd implements Listener {
     public void onTick(TimerEvent e){
         if (!e.getTimer().equals(TickTimer.TICK_1)) return;
         ticksPassed++;
-        if (ticksPassed == 200) game.setGameState(GameState.LOBBY);
+        if (ticksPassed >= 200) {
+            game.setGameState(GameState.LOBBY);
+            HandlerList.unregisterAll(this);
+        }
     }
 }

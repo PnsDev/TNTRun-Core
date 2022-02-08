@@ -54,7 +54,7 @@ public enum PowerUpType {
             "➚",
             ChatColor.YELLOW,
             "",
-            (Player player) -> {player.getInventory().addItem(new ItemStack(Material.PISTON_BASE, 3));}
+            (Player player) -> {player.getInventory().addItem(new ItemStack(Material.PISTON_BASE, 1));}
     );
 
 

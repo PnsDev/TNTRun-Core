@@ -28,7 +28,7 @@ public class PlayerConnectionEvents implements Listener {
         core.getLobby().addPlayer(e.getPlayer());
         Bukkit.getOnlinePlayers().forEach(p -> {
             if (!core.getLobby().isPlayerInLobby(p)) e.getPlayer().hidePlayer(p);
-            else e.getPlayer().sendMessage("§7[§a+§7] §7" + e.getPlayer().getName());
+            else p.sendMessage("§7[§a+§7] §7" + e.getPlayer().getName());
         });
     }
 

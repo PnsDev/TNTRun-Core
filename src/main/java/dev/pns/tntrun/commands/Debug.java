@@ -2,9 +2,10 @@ package dev.pns.tntrun.commands;
 
 import lombok.RequiredArgsConstructor;
 import net.minecraft.server.v1_8_R3.EntityArmorStand;
-import net.minecraft.server.v1_8_R3.World;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -24,18 +25,11 @@ public class Debug implements CommandExecutor {
         }
 
         Player player = (Player) commandSender;
-        if (!player.isOp()) {
-            player.sendMessage(ChatColor.RED + "You don't have permission to use this command");
-            return false;
-        }
+        World world = Bukkit.getWorld("world");
+        player.teleport(world.getSpawnLocation());
 
-        World world = ((CraftWorld) player.getWorld()).getHandle();
-        EntityArmorStand nmsArmorStand = new EntityArmorStand(world, player.getLocation().getX() + 0.5, player.getLocation().getY() + 1, player.getLocation().getZ() + 0.5);
-        nmsArmorStand.setInvisible(true);
-        nmsArmorStand.setGravity(false);
-        nmsArmorStand.setCustomNameVisible(true);
-        nmsArmorStand.setEquipment(Integer.parseInt(args[0]), CraftItemStack.asNMSCopy(new ItemStack(Material.SKULL_ITEM, 1, (short) 3)));
-        world.addEntity(nmsArmorStand);
+        player.setLevel(1000);
+        player.getInventory().setItem(0, new ItemStack(Material.FEATHER));
 
 
         return false;

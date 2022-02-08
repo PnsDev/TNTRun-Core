@@ -7,6 +7,7 @@ import dev.pns.tntrun.game.constructors.GameMap;
 import dev.pns.tntrun.game.tasks.PowerUp;
 import dev.pns.tntrun.misc.timer.TickTimer;
 import dev.pns.tntrun.misc.timer.TimerEvent;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -27,6 +28,7 @@ public class PowerUpSpawn implements Listener {
 
     public PowerUpSpawn(Game game) {
         this.game = game;
+        game.setLastPowerUpSpawn(System.currentTimeMillis());
 
         GameMap gameMap = game.getMap();
         possibleBlocks = new ArrayList<>();
@@ -37,7 +39,7 @@ public class PowerUpSpawn implements Listener {
             for (int z = (int) Math.ceil(min.getZ()); z <= max.getZ(); z++) {
                 for (int y = (int) Math.ceil(min.getY()); y <= max.getY(); y++) {
                     Block block = game.getWorld().getBlockAt(x, y, z);
-                    if (block.getType().isSolid() && LocationTracking.getBreakableBlockTypes().contains(block.getType()))
+                    if (block.getType().isSolid() && LocationTracking.getBreakableBlockTypes().contains(block.getType()) && !block.getType().equals(Material.TNT))
                         possibleBlocks.add(block);
                 }
             }
@@ -49,12 +51,13 @@ public class PowerUpSpawn implements Listener {
     public void onTick(TimerEvent e) {
         if (!e.getTimer().equals(TickTimer.TICK_1)) return;
         ticksPassed++;
-        if (ticksPassed >= game.getPowerupRate()) {
+        if (ticksPassed >= game.getPowerUpRate()) {
             ticksPassed = 0;
             Block block = findSuitableBlock();
             PowerUpType powerUpType = PowerUpType.getRandomFiltered(game.getDisabledPowerups());
             if (block == null || powerUpType == null) return;
-            PowerUp.spawnPowerUp(game, powerUpType, block.getLocation());
+            PowerUp.spawnPowerUp(game, powerUpType, block.getLocation().add(0.5, 1.5, 0.5));
+            game.setLastPowerUpSpawn(System.currentTimeMillis());
         }
     }
 
@@ -62,7 +65,7 @@ public class PowerUpSpawn implements Listener {
     // list of eligible blocks as they're removed from
     // the map.
     /**
-     * Remove a block from the list of possible blocks for poertups to spawn on.
+     * Remove a block from the list of possible blocks for powerups to spawn on.
      * @param block The block to remove.
      */
     public void removeBlock(Block block) {
