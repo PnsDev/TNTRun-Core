@@ -62,6 +62,8 @@ public class PowerUp implements Listener {
                 game.playSound(Sound.ENDERDRAGON_GROWL, 1, 1);
                 title = new Title(powerUpType.getColor() + "[" + powerUpType.getSymbol() + "]", powerUpType.getColor() + powerUpType.getName(), 5, 20, 5);
 
+
+
                 World world = ((CraftWorld) spawnLocation.getWorld()).getHandle();
                 EntityArmorStand nmsArmorStand = new EntityArmorStand(world, spawnLocation.getX(), spawnLocation.getY(), spawnLocation.getZ());
                 nmsArmorStand.setInvisible(true);
