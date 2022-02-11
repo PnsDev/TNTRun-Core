@@ -3,7 +3,6 @@ package dev.pns.tntrun.events.gameWorlds;
 import de.tr7zw.nbtapi.NBTItem;
 import dev.pns.tntrun.misc.Lobby;
 import lombok.RequiredArgsConstructor;
-import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -36,7 +35,7 @@ public class DoubleJump implements Listener {
     @EventHandler
     public void onSpaceDoubleJump(PlayerToggleFlightEvent e) {
         if (e.getPlayer().getWorld().equals(lobby.getWorld())) return;
-        if (!e.isFlying() || !e.getPlayer().getGameMode().equals(GameMode.SURVIVAL)) return;
+        if (!e.isFlying() || e.getPlayer().getLevel() <= 0) return;
         e.setCancelled(true);
         e.getPlayer().setAllowFlight(false);
         if (e.getPlayer().getLevel() <= 0) return;

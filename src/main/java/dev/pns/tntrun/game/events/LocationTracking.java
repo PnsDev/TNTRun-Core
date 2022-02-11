@@ -144,6 +144,16 @@ public class LocationTracking implements Listener {
         }
     }
 
+    @EventHandler
+    public void spectatorFlight(TimerEvent e) {
+        if (!e.getTimer().equals(TickTimer.TICK_6)) return;
+        for (GamePlayer gamePlayer : game.getSpectators()) {
+            Player player = gamePlayer.getPlayer();
+            if (player.getAllowFlight()) continue;
+            player.setAllowFlight(true);
+        }
+    }
+
     private final static Title cheatingTitle = new Title("&c&lCheating Detected", "&7You're using an unfair advantage and have been killed!", 5, 20, 5);
     private void killForCheating(GamePlayer gamePlayer) {
         game.makeSpectator(gamePlayer);

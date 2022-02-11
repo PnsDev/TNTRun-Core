@@ -13,6 +13,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static dev.pns.tntrun.utils.ItemUtils.makePlaceableOnMap;
+
 @AllArgsConstructor @Getter
 public enum PowerUpType {
 
@@ -37,8 +39,8 @@ public enum PowerUpType {
             "Grants the person who picks this up 3 placeable blocks",
             "❏",
             ChatColor.RED,
-            "", // todo: texture
-            (Player player) -> {player.getInventory().addItem(new ItemStack(Material.QUARTZ_BLOCK, 3));}
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzkyYjJiMDQxNGNlZTM2YjI0ZDgzZjVjZmEwNzFkODYzODUyNzI0OWMyZGNkZGZhNTgwYmUzN2UwN2M2MGUwOCJ9fX0=",
+            (Player player) -> {player.getInventory().addItem(makePlaceableOnMap(new ItemStack(Material.QUARTZ_BLOCK, 3)));}
     ),
     Invisibility(
             "Invisibility",
@@ -53,8 +55,8 @@ public enum PowerUpType {
             "Grants the person who picks this up a jump pad",
             "➚",
             ChatColor.YELLOW,
-            "",
-            (Player player) -> {player.getInventory().addItem(new ItemStack(Material.PISTON_BASE, 1));}
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjQ0Yzk3OTgzY2E4YWFmNThjNjk2MTgyOTExZTNiYzY4NTEwZjI5ZDk2MzJkMTM0ZjgzNDU3YTUyZjRlNWY5NSJ9fX0=",
+            (Player player) -> {player.getInventory().addItem(makePlaceableOnMap(new ItemStack(Material.PISTON_BASE, 1)));}
     );
 
 

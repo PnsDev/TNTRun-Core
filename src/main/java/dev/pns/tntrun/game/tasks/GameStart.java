@@ -59,7 +59,7 @@ public class GameStart implements Listener {
         game.setGameStart(System.currentTimeMillis());
 
         for (GamePlayer gamePlayer : game.getPlayers()) {
-            gamePlayer.getPlayer().setGameMode(GameMode.SURVIVAL);
+            gamePlayer.getPlayer().setGameMode(GameMode.ADVENTURE);
             gamePlayer.getPlayer().setAllowFlight(true);
             gamePlayer.getPlayer().setExp(0);
             gamePlayer.getPlayer().setLevel(game.getDoubleJumpAmount());

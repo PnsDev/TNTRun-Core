@@ -6,6 +6,8 @@ import org.bukkit.entity.Player;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
+import static dev.pns.tntrun.utils.ReflectionUtil.getMinecraftClass;
+
 public final class ChatUtils {
     /**
      * Formats a message with the color codes
@@ -22,16 +24,13 @@ public final class ChatUtils {
      * @param message The message to send
      */
     public static void sendActionBar(Player p, String message) {
-
-        String craftBukkitPackage = p.getClass().getPackage().getName().replace(".entity", "");
-        String mcPackage = "net.minecraft.server." + craftBukkitPackage.substring(craftBukkitPackage.lastIndexOf(".") + 1);
         try {
-            Object messageComponent = Class.forName(mcPackage + ".IChatBaseComponent$ChatSerializer").getMethod("a", String.class).invoke(null, "{\"text\":\"" + message.replace("&", "§") + "\"}");
-            Object packetPlayOutChat = Class.forName(mcPackage + ".PacketPlayOutChat").getConstructor(Class.forName(mcPackage + ".IChatBaseComponent"), byte.class).newInstance(messageComponent, (byte) 2);
+            Object messageComponent = getMinecraftClass("IChatBaseComponent$ChatSerializer").getMethod("a", String.class).invoke(null, "{\"text\":\"" + message.replace("&", "§") + "\"}");
+            Object packetPlayOutChat = getMinecraftClass("PacketPlayOutChat").getConstructor(getMinecraftClass("IChatBaseComponent"), byte.class).newInstance(messageComponent, (byte) 2);
 
             Object entityPlayer = p.getClass().getMethod("getHandle").invoke(p);
             Object playerConnection = entityPlayer.getClass().getField("playerConnection").get(entityPlayer);
-            playerConnection.getClass().getMethod("sendPacket", Class.forName(mcPackage + ".Packet")).invoke(playerConnection, packetPlayOutChat);
+            playerConnection.getClass().getMethod("sendPacket", getMinecraftClass("Packet")).invoke(playerConnection, packetPlayOutChat);
         } catch (Exception e) {e.printStackTrace();}
 
     }

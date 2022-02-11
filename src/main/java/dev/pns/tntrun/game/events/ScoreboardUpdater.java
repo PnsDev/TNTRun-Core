@@ -4,7 +4,6 @@ import dev.pns.tntrun.game.Game;
 import dev.pns.tntrun.misc.timer.TickTimer;
 import dev.pns.tntrun.misc.timer.TimerEvent;
 import dev.pns.tntrun.utils.ScoreHelper;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -12,13 +11,10 @@ import org.bukkit.event.Listener;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 
 import static dev.pns.tntrun.utils.ChatUtils.prettyTimeFormat;
-import static dev.pns.tntrun.utils.ScoreHelper.*;
-import static java.lang.String.format;
+import static dev.pns.tntrun.utils.ScoreHelper.createScore;
+import static dev.pns.tntrun.utils.ScoreHelper.getByPlayer;
 
 @RequiredArgsConstructor
 public class ScoreboardUpdater implements Listener {

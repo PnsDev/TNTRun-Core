@@ -2,10 +2,10 @@ package dev.pns.tntrun.game;
 
 import com.google.common.collect.Iterables;
 import dev.pns.tntrun.Core;
-import dev.pns.tntrun.game.constructors.PowerUpType;
 import dev.pns.tntrun.game.constructors.GameMap;
 import dev.pns.tntrun.game.constructors.GamePlayer;
 import dev.pns.tntrun.game.constructors.GameState;
+import dev.pns.tntrun.game.constructors.PowerUpType;
 import dev.pns.tntrun.game.tasks.GameEnd;
 import dev.pns.tntrun.game.tasks.GameStart;
 import dev.pns.tntrun.game.tasks.LobbyStart;

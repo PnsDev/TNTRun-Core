@@ -20,6 +20,8 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 
 import static dev.pns.tntrun.utils.ItemUtils.createCustomSkull;
+import static dev.pns.tntrun.utils.ReflectionUtil.getCraftBukkitClass;
+import static dev.pns.tntrun.utils.ReflectionUtil.getMinecraftClass;
 
 public class PowerUp implements Listener {
     private final Game game;
@@ -60,20 +62,22 @@ public class PowerUp implements Listener {
 
                 try {
                     Object mcWorld = spawnLocation.getWorld().getClass().getMethod("getHandle").invoke(spawnLocation.getWorld());
-                    String mcPackage = "net.minecraft.server." + Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-                    String craftBukkitPackage = "org.bukkit.craftbukkit." + mcPackage.substring(mcPackage.lastIndexOf(".") + 1);
-                    Class<?> craftWorld = Class.forName(mcPackage + ".World");
-                    Class<?> nmsItemStack = Class.forName(mcPackage + ".ItemStack");
-                    Class<?> craftItemStack = Class.forName(craftBukkitPackage + ".inventory.CraftItemStack");
-                    Class<?> armorStandClass = Class.forName(mcPackage + ".EntityArmorStand");
+                    Class<?> craftWorld = getMinecraftClass("World");
+                    Class<?> nmsItemStack = getMinecraftClass("ItemStack");
+                    Class<?> craftItemStack = getCraftBukkitClass("inventory.CraftItemStack");
+                    Class<?> armorStandClass = getMinecraftClass("EntityArmorStand");
+
+                    // Create NMS armor stand
                     Object nmsArmorStand = armorStandClass.getConstructor(craftWorld, double.class, double.class, double.class).newInstance(mcWorld, spawnLocation.getX(), spawnLocation.getY(), spawnLocation.getZ());
                     nmsArmorStand.getClass().getMethod("setInvisible", boolean.class).invoke(nmsArmorStand, true);
                     nmsArmorStand.getClass().getMethod("setCustomNameVisible", boolean.class).invoke(nmsArmorStand, true);
                     nmsArmorStand.getClass().getMethod("setCustomName", String.class).invoke(nmsArmorStand, powerUpType.getColor() + powerUpType.getName());
 
+                    // Apply NMS armor stand
                     Object nmsItem = craftItemStack.getMethod("asNMSCopy", org.bukkit.inventory.ItemStack.class).invoke(null, createCustomSkull(powerUpType.getTexture()));
                     nmsArmorStand.getClass().getMethod("setEquipment", int.class, nmsItemStack).invoke(nmsArmorStand, 4, nmsItem);
 
+                    // Spawn it in
                     mcWorld.getClass().getMethod("addEntity", armorStandClass.getSuperclass().getSuperclass()).invoke(mcWorld, nmsArmorStand);
                     armorStand = (ArmorStand) nmsArmorStand.getClass().getMethod("getBukkitEntity").invoke(nmsArmorStand);
                     armorStand.setGravity(false);
