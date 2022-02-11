@@ -1,20 +1,16 @@
 package dev.pns.tntrun.game.tasks;
 
-import dev.pns.tntrun.game.constructors.PowerUpType;
 import dev.pns.tntrun.game.Game;
 import dev.pns.tntrun.game.constructors.GamePlayer;
 import dev.pns.tntrun.game.constructors.GameState;
+import dev.pns.tntrun.game.constructors.PowerUpType;
 import dev.pns.tntrun.misc.timer.TickTimer;
 import dev.pns.tntrun.misc.timer.TimerEvent;
 import dev.pns.tntrun.utils.Title;
 import lombok.Getter;
-import net.minecraft.server.v1_8_R3.EntityArmorStand;
-import net.minecraft.server.v1_8_R3.World;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
-import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -62,18 +58,26 @@ public class PowerUp implements Listener {
                 game.playSound(Sound.ENDERDRAGON_GROWL, 1, 1);
                 title = new Title(powerUpType.getColor() + "[" + powerUpType.getSymbol() + "]", powerUpType.getColor() + powerUpType.getName(), 5, 20, 5);
 
+                try {
+                    Object mcWorld = spawnLocation.getWorld().getClass().getMethod("getHandle").invoke(spawnLocation.getWorld());
+                    String mcPackage = "net.minecraft.server." + Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
+                    String craftBukkitPackage = "org.bukkit.craftbukkit." + mcPackage.substring(mcPackage.lastIndexOf(".") + 1);
+                    Class<?> craftWorld = Class.forName(mcPackage + ".World");
+                    Class<?> nmsItemStack = Class.forName(mcPackage + ".ItemStack");
+                    Class<?> craftItemStack = Class.forName(craftBukkitPackage + ".inventory.CraftItemStack");
+                    Class<?> armorStandClass = Class.forName(mcPackage + ".EntityArmorStand");
+                    Object nmsArmorStand = armorStandClass.getConstructor(craftWorld, double.class, double.class, double.class).newInstance(mcWorld, spawnLocation.getX(), spawnLocation.getY(), spawnLocation.getZ());
+                    nmsArmorStand.getClass().getMethod("setInvisible", boolean.class).invoke(nmsArmorStand, true);
+                    nmsArmorStand.getClass().getMethod("setCustomNameVisible", boolean.class).invoke(nmsArmorStand, true);
+                    nmsArmorStand.getClass().getMethod("setCustomName", String.class).invoke(nmsArmorStand, powerUpType.getColor() + powerUpType.getName());
 
+                    Object nmsItem = craftItemStack.getMethod("asNMSCopy", org.bukkit.inventory.ItemStack.class).invoke(null, createCustomSkull(powerUpType.getTexture()));
+                    nmsArmorStand.getClass().getMethod("setEquipment", int.class, nmsItemStack).invoke(nmsArmorStand, 4, nmsItem);
 
-                World world = ((CraftWorld) spawnLocation.getWorld()).getHandle();
-                EntityArmorStand nmsArmorStand = new EntityArmorStand(world, spawnLocation.getX(), spawnLocation.getY(), spawnLocation.getZ());
-                nmsArmorStand.setInvisible(true);
-                nmsArmorStand.setCustomNameVisible(true);
-                nmsArmorStand.setCustomName(powerUpType.getColor() + powerUpType.getName());
-                nmsArmorStand.setEquipment(4, CraftItemStack.asNMSCopy(createCustomSkull(powerUpType.getTexture())));
-                world.addEntity(nmsArmorStand);
-
-                armorStand = (ArmorStand) nmsArmorStand.getBukkitEntity();
-                armorStand.setGravity(false);
+                    mcWorld.getClass().getMethod("addEntity", armorStandClass.getSuperclass().getSuperclass()).invoke(mcWorld, nmsArmorStand);
+                    armorStand = (ArmorStand) nmsArmorStand.getClass().getMethod("getBukkitEntity").invoke(nmsArmorStand);
+                    armorStand.setGravity(false);
+                } catch (Exception exception) {exception.printStackTrace();}
             }
 
             Title finalTitle = title;

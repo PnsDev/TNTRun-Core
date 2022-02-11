@@ -1,9 +1,6 @@
 package dev.pns.tntrun.utils;
 
-import net.minecraft.server.v1_8_R3.IChatBaseComponent;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.bukkit.ChatColor;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.time.Duration;
@@ -25,8 +22,18 @@ public final class ChatUtils {
      * @param message The message to send
      */
     public static void sendActionBar(Player p, String message) {
-        PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + message.replace("&", "§") + "\"}"), (byte) 2);
-        ((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
+
+        String craftBukkitPackage = p.getClass().getPackage().getName().replace(".entity", "");
+        String mcPackage = "net.minecraft.server." + craftBukkitPackage.substring(craftBukkitPackage.lastIndexOf(".") + 1);
+        try {
+            Object messageComponent = Class.forName(mcPackage + ".IChatBaseComponent$ChatSerializer").getMethod("a", String.class).invoke(null, "{\"text\":\"" + message.replace("&", "§") + "\"}");
+            Object packetPlayOutChat = Class.forName(mcPackage + ".PacketPlayOutChat").getConstructor(Class.forName(mcPackage + ".IChatBaseComponent"), byte.class).newInstance(messageComponent, (byte) 2);
+
+            Object entityPlayer = p.getClass().getMethod("getHandle").invoke(p);
+            Object playerConnection = entityPlayer.getClass().getField("playerConnection").get(entityPlayer);
+            playerConnection.getClass().getMethod("sendPacket", Class.forName(mcPackage + ".Packet")).invoke(playerConnection, packetPlayOutChat);
+        } catch (Exception e) {e.printStackTrace();}
+
     }
 
     /**
