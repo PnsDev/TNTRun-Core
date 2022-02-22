@@ -1,4 +1,4 @@
-package dev.pns.tntrun.utils;
+package dev.pns.tntrun.misc;
 
 import lombok.AccessLevel;
 import lombok.Getter;

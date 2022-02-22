@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,6 +26,7 @@ import java.util.UUID;
 
 import static dev.pns.tntrun.utils.ChatUtils.formatMessage;
 import static dev.pns.tntrun.utils.ChatUtils.getCenteredMessage;
+import static dev.pns.tntrun.utils.ScoreHelper.removeScore;
 import static dev.pns.tntrun.utils.SlimeWorldUtils.loadMap;
 
 @Data
@@ -65,6 +67,11 @@ public class Game {
     private boolean powerUpsEnabled = true;
     private final List<PowerUpType> disabledPowerups = new ArrayList<>();
     private final List<PotionEffect> enabledPotionEffects = new ArrayList<>();
+    private final List<PotionEffect> splashPotionEffects = List.of(
+            new PotionEffect(PotionEffectType.SPEED, 3000, 0, false, false),
+            new PotionEffect(PotionEffectType.SPEED, 3000, 0, false, false),
+            new PotionEffect(PotionEffectType.SPEED, 3000, 0, false, false)
+    );
     private int powerUpRate = 1200;
     private int blockBreakSpeed = 6;
     private int speedPotionAmount = 3;
@@ -96,9 +103,8 @@ public class Game {
      */
     public void setGameState(GameState newState) {
         switch (newState) {
-            case LOBBY:
+            case LOBBY -> {
                 if (!state.equals(GameState.STARTING) && !state.equals(GameState.ENDING)) return;
-
                 if (state.equals(GameState.ENDING)) {
                     deathOrder.clear();
                     if (randomGameMaps) map = GameMap.getRandomMap();
@@ -114,29 +120,26 @@ public class Game {
                     this.players.forEach(targetPlayer -> {
                         clearPlayer(targetPlayer.getPlayer());
                         targetPlayer.getPlayer().teleport(spawn);
+                        targetPlayer.getPlayer().setAllowFlight(false);
                         this.players.forEach(toBeDisplayed -> targetPlayer.getPlayer().showPlayer(toBeDisplayed.getPlayer()));
                     });
-
-                    Bukkit.unloadWorld(world, false);
                 }
-
                 if (world != null && Bukkit.getWorld(world.getName()) != null) Bukkit.unloadWorld(world, false);
-                break;
-            case STARTING:
+            }
+            case STARTING -> {
                 if (!state.equals(GameState.LOBBY)) return;
                 loadMap(core.getSlimeWorldLoader(), map.getSlimeWorld(), gameID.toString()).whenComplete((world, throwable) -> {
                     if (throwable != null) return;
                     this.world = Bukkit.getWorld(gameID.toString());
                 });
                 Bukkit.getPluginManager().registerEvents(new LobbyStart(this, 200), core);
-                break;
-            case STARTED:
+            }
+            case STARTED -> {
                 if (!state.equals(GameState.STARTING)) return;
                 if (world == null) {
                     setGameState(GameState.LOBBY);
                     return;
                 }
-
                 int i = 0;
                 for (GamePlayer player : players) {
                     player.getPlayer().teleport(map.getSpawnPoints().get(i).toLocation(world));
@@ -156,10 +159,9 @@ public class Game {
                 sendMessage(getCenteredMessage("&f&lMap&8:"));
                 sendMessage(getCenteredMessage("&f" + this.map.getName() + " &7created by &f" + String.join("&8,&f ", this.map.getBuilders())));
                 sendMessage("&9&l▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
-
                 Bukkit.getPluginManager().registerEvents(new GameStart(this), core);
-                break;
-            case ENDING:
+            }
+            case ENDING -> {
                 if (!state.equals(GameState.STARTED)) return;
 
                 // Unregister events
@@ -168,13 +170,14 @@ public class Game {
                     HandlerList.unregisterAll(it.next());
                     it.remove();
                 }
-
                 sendMessage("&9&l▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
                 sendMessage(getCenteredMessage("&e&lTNTRun"));
                 sendMessage(" \n");
                 sendMessage(getCenteredMessage(players.size() >= 1 ? "&c&l1st Place&r " + players.get(0).getPlayer().getName() : "Uh something broke lmao"));
-                if (deathOrder.size() >= 1) sendMessage(getCenteredMessage("&6&l2nd Place&r " + deathOrder.get(deathOrder.size() - 1).getPlayer().getName()));
-                if (deathOrder.size() >= 2) sendMessage(getCenteredMessage("&e&l3rd Place&r " + deathOrder.get(deathOrder.size() - 2).getPlayer().getName()));
+                if (deathOrder.size() >= 1)
+                    sendMessage(getCenteredMessage("&6&l2nd Place&r " + deathOrder.get(deathOrder.size() - 1).getPlayer().getName()));
+                if (deathOrder.size() >= 2)
+                    sendMessage(getCenteredMessage("&e&l3rd Place&r " + deathOrder.get(deathOrder.size() - 2).getPlayer().getName()));
                 sendMessage(" \n");
                 sendMessage(getCenteredMessage("&f&lMap&8:"));
                 sendMessage(getCenteredMessage("&f" + this.map.getName() + " &7created by &f" + String.join("&8,&f ", this.map.getBuilders())));
@@ -183,8 +186,9 @@ public class Game {
                 // TODO:
                 //  win effects?
                 //  update stats?
+                getAllPlayers().forEach(gamePlayer -> removeScore(gamePlayer.getPlayer()));
                 Bukkit.getPluginManager().registerEvents(new GameEnd(this), core);
-                break;
+            }
         }
         state = newState;
     }
@@ -199,13 +203,12 @@ public class Game {
         core.getLobby().getPlayers().remove(player);
         player.getInventory().clear();
         sendMessage("&7[&a+&7] &7" + player.getName());
+        players.forEach(toBeDisplayed -> player.showPlayer(toBeDisplayed.getPlayer()));
         if (state.equals(GameState.STARTED) || state.equals(GameState.ENDING)) {
             makeSpectator(new GamePlayer(player, this));
             return true;
         }
-        for(GamePlayer gamePlayer : players) {
-            gamePlayer.getPlayer().showPlayer(player);
-        }
+        getPlayers().forEach(toBeShown -> toBeShown.getPlayer().showPlayer(player));
         this.players.add(new GamePlayer(player, this));
         return true;
     }
@@ -224,7 +227,7 @@ public class Game {
 
     /**
      * Is in game as player
-     * @param player
+     * @param player The player to check
      * @return Whether the player is in the game
      */
     public boolean isPlayer(Player player) {
@@ -239,6 +242,10 @@ public class Game {
     public void removeFromGame(GamePlayer gamePlayer) {
         if (players.contains(gamePlayer) && state.equals(GameState.STARTED)) makeSpectator(gamePlayer);
         else players.remove(gamePlayer);
+        if (players.size() == 0) {
+            core.getGameManager().destroyGame(this);
+            return;
+        }
         sendMessage("&7[&c-&7] &7" + gamePlayer.getPlayer().getName());
         if (!gamePlayer.getPlayer().isOnline()) {
             spectators.remove(gamePlayer);

@@ -2,10 +2,13 @@ package dev.pns.tntrun.game.tasks;
 
 import dev.pns.tntrun.game.Game;
 import dev.pns.tntrun.game.constructors.GamePlayer;
-import dev.pns.tntrun.game.events.*;
+import dev.pns.tntrun.game.events.BlockRemoval;
+import dev.pns.tntrun.game.events.LocationTracking;
+import dev.pns.tntrun.game.events.PVPRunEvents;
+import dev.pns.tntrun.game.events.PowerUpSpawn;
+import dev.pns.tntrun.misc.Title;
 import dev.pns.tntrun.misc.timer.TickTimer;
 import dev.pns.tntrun.misc.timer.TimerEvent;
-import dev.pns.tntrun.utils.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -13,6 +16,14 @@ import org.bukkit.Sound;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.Potion;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static dev.pns.tntrun.utils.ChatUtils.coloredProgressBarMaker;
 import static dev.pns.tntrun.utils.ChatUtils.sendActionBar;
@@ -55,8 +66,32 @@ public class GameStart implements Listener {
          * and block removal start working.
          */
         game.playSound(Sound.NOTE_PLING, 1, 1);
-
         game.setGameStart(System.currentTimeMillis());
+
+        List<ItemStack> potions = new ArrayList<>();
+        for (PotionEffect pot : game.getSplashPotionEffects()) {
+            // Create a new potion
+            Potion potion = new Potion(PotionType.getByEffect(pot.getType()));
+            potion.setSplash(true);
+
+            // Apply the potion effects to the potion
+            ItemStack potionItem = potion.toItemStack(1);
+            PotionMeta meta = (PotionMeta) potionItem.getItemMeta();
+            meta.setMainEffect(pot.getType());
+            meta.addCustomEffect(pot, true);
+            potionItem.setItemMeta(meta);
+
+            // Add the potion to the list if not already in it
+            boolean found = false;
+            for (ItemStack potionStack : potions) {
+                if (!potionStack.isSimilar(potionItem)) continue;
+                potionStack.setAmount(potionStack.getAmount() + 1);
+                found = true;
+                break;
+            }
+
+            if (!found) potions.add(potionItem);
+        }
 
         for (GamePlayer gamePlayer : game.getPlayers()) {
             gamePlayer.getPlayer().setGameMode(GameMode.ADVENTURE);
@@ -64,6 +99,7 @@ public class GameStart implements Listener {
             gamePlayer.getPlayer().setExp(0);
             gamePlayer.getPlayer().setLevel(game.getDoubleJumpAmount());
             gamePlayer.getPlayer().getInventory().setItem(0, itemFactory(Material.FEATHER, "§aDouble Jump", null));
+            potions.forEach(potion -> gamePlayer.getPlayer().getInventory().addItem(potion));
         }
 
         HandlerList.unregisterAll(this);

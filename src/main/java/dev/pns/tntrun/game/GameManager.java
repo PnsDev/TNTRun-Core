@@ -3,7 +3,6 @@ package dev.pns.tntrun.game;
 import dev.pns.tntrun.Core;
 import dev.pns.tntrun.game.constructors.GamePlayer;
 import dev.pns.tntrun.game.constructors.GameState;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -16,7 +15,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class GameManager {
     private final Core core;
-    @Getter
     private final List<Game> games = new ArrayList<>();
 
     /**
@@ -28,6 +26,12 @@ public class GameManager {
         game.joinGame(player);
         games.add(game);
     }
+
+    /**
+     * Returns a clone of the games list
+     * @return the list
+     */
+    public List<Game> getGames() {return new ArrayList<>(games);}
 
     /**
      * Destroys a game

@@ -16,6 +16,7 @@ import static dev.pns.tntrun.utils.ReflectionUtil.getCraftBukkitClass;
 import static dev.pns.tntrun.utils.ReflectionUtil.getMinecraftClass;
 
 public class ItemUtils {
+    // Used for the method `makePlaceableOnMap`
     private static Object placeableTagCompound = null;
 
     /**

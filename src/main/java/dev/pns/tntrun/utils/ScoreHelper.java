@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class ScoreHelper {
-    private static Map<UUID, ScoreHelper> players = new HashMap<>();
+    private static final Map<UUID, ScoreHelper> players = new HashMap<>();
 
     public static boolean hasScore(Player player) {
         return players.containsKey(player.getUniqueId());
@@ -28,12 +28,13 @@ public class ScoreHelper {
         return players.get(player.getUniqueId());
     }
 
-    public static ScoreHelper removeScore(Player player) {
-        return players.remove(player.getUniqueId());
+    public static void removeScore(Player player) {
+        ScoreHelper score = players.remove(player.getUniqueId());
+        score.sidebar.unregister();
     }
 
-    private Scoreboard scoreboard;
-    private Objective sidebar;
+    private final Scoreboard scoreboard;
+    private final Objective sidebar;
 
     private ScoreHelper(Player player) {
         scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
@@ -41,8 +42,7 @@ public class ScoreHelper {
         sidebar.setDisplaySlot(DisplaySlot.SIDEBAR);
         // Create Teams
         for(int i=1; i<=15; i++) {
-            Team team = scoreboard.registerNewTeam("SLOT_" + i);
-            team.addEntry(genEntry(i));
+            scoreboard.registerNewTeam("SLOT_" + i).addEntry(genEntry(i));
         }
         player.setScoreboard(scoreboard);
         players.put(player.getUniqueId(), this);

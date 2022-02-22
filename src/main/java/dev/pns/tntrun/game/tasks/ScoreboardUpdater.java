@@ -1,4 +1,4 @@
-package dev.pns.tntrun.game.events;
+package dev.pns.tntrun.game.tasks;
 
 import dev.pns.tntrun.game.Game;
 import dev.pns.tntrun.misc.timer.TickTimer;
@@ -29,7 +29,6 @@ public class ScoreboardUpdater implements Listener {
 
         game.getAllPlayers().forEach(gamePlayer -> {
             ScoreHelper scoreHelper = getByPlayer(gamePlayer.getPlayer());
-            ;
             if (scoreHelper == null) scoreHelper = createScore(gamePlayer.getPlayer());
             int dj = gamePlayer.getPlayer().getLevel();
             scoreHelper.setTitle("&c&lTNT Labs");

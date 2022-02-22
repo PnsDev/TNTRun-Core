@@ -12,8 +12,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class MenuInterface {
     protected final GuiManager manager;
@@ -187,27 +188,13 @@ public class MenuInterface {
         }
     }
 
-    public void fill(Material material, int... negate) {
-        ItemStack spacer = new ItemStack(material);
+    public void fill(ItemStack spacer, int... negate) {
         ItemMeta spacerMeta = spacer.getItemMeta();
         spacerMeta.setDisplayName(ChatColor.BLACK + "_");
         spacer.setItemMeta(spacerMeta);
-
-        for (int i = 0; i < inventory.getSize(); i++) {
-            boolean dontDo = false;
-            for (int neg : negate) {
-                if (neg == i) {
-                    dontDo = true;
-                    break;
-                }
-            }
-
-            if (!dontDo) {
-                if (inventory.getItem(i) == null) {
-                    set(i, new MenuInterfaceButton(spacer));
-                }
-            }
-        }
+        List<Integer> setSlots = new ArrayList<>(IntStream.rangeClosed(0, inventory.getSize() - 1).boxed().toList());
+        if (negate != null) setSlots.removeAll(Arrays.stream(negate).boxed().toList());
+        setSlots.forEach(i -> set(i, new MenuInterfaceButton(spacer)));
     }
 
     public ItemStack[] getContents() {

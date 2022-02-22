@@ -40,7 +40,7 @@ public final class Core extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PlayerConnectionEvents(this), this);
 
         Bukkit.getPluginCommand("game").setExecutor(new GameCmd(this));
-        Bukkit.getPluginCommand("debug").setExecutor(new Debug());
+        Bukkit.getPluginCommand("debug").setExecutor(new Debug(this));
 
         loadDefaultMaps();
 
