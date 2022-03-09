@@ -38,9 +38,22 @@ public class NPCMenu extends MenuInterface {
         if (gamePlayer == null) {
             setMenuIcon(MenuItem.GAME_SEARCH, 11);
             setMenuIcon(MenuItem.CREATE_GAME, 15);
-        } else {
-            setMenuIcon(MenuItem.LEAVE_GAME, 13);
+            return;
         }
+        if (gamePlayer.getGame().getOwner().equals(gamePlayer.getPlayer())) {
+            setMenuIcon(MenuItem.LEAVE_GAME, 11);
+            setMenuIcon(MenuItem.MANAGE_PLAYERS, 13);
+            setMenuIcon(MenuItem.MAPS_SELECTION, 15);
+            setMenuIcon(MenuItem.SETTINGS, 17);
+            return;
+        }
+        if (gamePlayer.getGame().getModerators().contains(gamePlayer.getPlayer())) {
+            setMenuIcon(MenuItem.LEAVE_GAME, 11);
+            setMenuIcon(MenuItem.MANAGE_PLAYERS, 14);
+            setMenuIcon(MenuItem.MAPS_SELECTION, 17);
+            return;
+        }
+        setMenuIcon(MenuItem.LEAVE_GAME, 13);
     }
 
     private void setMenuIcon(MenuItem menuItem, int slot) {
@@ -84,8 +97,29 @@ public class NPCMenu extends MenuInterface {
                     }
                     return OnClick.ButtonAction.CLOSE;
                 }
+        ),
+        MAPS_SELECTION(
+                (short) 2,
+                itemFactory(Material.EMPTY_MAP, "&dMap", Arrays.asList("&7Choose the map that will", "&7be played on this game", " ", "&e ► Click to browse")),
+                (core, menu, player) -> {
+                    return OnClick.ButtonAction.CANCEL;
+                }
+        ),
+        MANAGE_PLAYERS(
+                (short) 5,
+                itemFactory(Material.SKULL, "&aManage Players", Arrays.asList("&7Manage the players currently", "&7in the game", " ", "&e ► Click to browse")),
+                (core, menu, player) -> {
+                    return OnClick.ButtonAction.CANCEL;
+                }
+        ),
+        SETTINGS(
+                (short) 3,
+                itemFactory(Material.REDSTONE_COMPARATOR, "&bSettings", Arrays.asList("&7Change the settings for", "&7the game", " ", "&e ► Click to browse")),
+                (core, menu, player) -> {
+                    new MainSettings(core, player).open(player);
+                    return OnClick.ButtonAction.CANCEL;
+                }
         );
-
 
         private final short glassColor;
         private final ItemStack item;

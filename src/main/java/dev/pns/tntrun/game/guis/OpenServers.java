@@ -10,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,10 +46,7 @@ public class OpenServers extends MenuInterface {
     public void update() {
         List<Game> games = core.getGameManager().getGames();
         // sort list based on players
-        games.sort((g1, g2) -> {
-            if (g1.getPlayers().size() == g2.getPlayers().size()) return 0;
-            return g1.getPlayers().size() > g2.getPlayers().size() ? -1 : 1;
-        });
+        games.sort(Comparator.comparingInt(g -> g.getPlayers().size()));
 
         // Back button
         if (page > 0) set(45, new MenuInterfaceButton(itemFactory(Material.ARROW, "&eBack", List.of("&7Click to go back one page")), (entity, stack, i, e) -> {page--;return OnClick.ButtonAction.CANCEL;}));
@@ -58,6 +56,9 @@ public class OpenServers extends MenuInterface {
         if (games.size() > (page + 1) * 9) set(53, new MenuInterfaceButton(itemFactory(Material.ARROW, "&eNext", List.of("&7Click to go forward one page")), (entity, stack, i, e) -> {page++;return OnClick.ButtonAction.CANCEL;}));
         else set(53, new MenuInterfaceButton(new ItemStack(Material.STAINED_GLASS_PANE, 1, (byte) 15)));
 
+        /*
+         * This is all the open servers displayed on the page.
+         */
         for (int i = page * 45 + (page * 9) ; i < (page + 1) * 45 + (page * 9); i++) {
             int realSlot = i - (page * 45 + (page * 9));
             if (i >= games.size()) {
@@ -78,10 +79,9 @@ public class OpenServers extends MenuInterface {
                                     .collect(Collectors.toList())
                     ),
                     (entity, stack, i1, e) -> {
-                        if (isFull) {
-                            //todo upgrade to premium menu
-                            return OnClick.ButtonAction.CLOSE;
-                        }
+                        //todo upgrade to premium menu
+                        if (isFull) return OnClick.ButtonAction.CLOSE;
+
                         if (core.getGameManager().getGamePlayer((Player) entity) != null) {
                             entity.sendMessage(formatMessage("&cYou are already in a game!"));
                             return OnClick.ButtonAction.CLOSE;
