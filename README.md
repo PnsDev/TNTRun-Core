@@ -4,11 +4,11 @@ Bringing a new and improved TNT Run experience for all to use!
 ## Gameplay
 WIP!
 
-## Featrues
+## Features
 |Feature| |
 |--|--|
 |Player Servers|✅|
-|Basic Powerups|✅|
+|Basic Power-ups|✅|
 |World/Game Management|✅|
 |Server Management|🚧|
 |Cosmetics|🚧|
